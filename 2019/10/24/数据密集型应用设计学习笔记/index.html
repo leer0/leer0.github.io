@@ -16,14 +16,14 @@
 
 
 <meta name="description" content="这是一篇对于数据密集型应用一书的学习笔记，主要记载书中所涉及重点内容的粗略记录，这本书对数据库相关知识进行了比较全面且详细的介绍，读完本书，能够对数据库的认识有更加深入的了解">
-<meta name="keywords" content="database">
+<meta name="keywords" content="关系模型,NoSql,MapReduce">
 <meta property="og:type" content="article">
 <meta property="og:title" content="数据密集型应用设计学习笔记">
 <meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;10&#x2F;24&#x2F;%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0&#x2F;index.html">
 <meta property="og:site_name" content="Leer0&#39;s Blog">
 <meta property="og:description" content="这是一篇对于数据密集型应用一书的学习笔记，主要记载书中所涉及重点内容的粗略记录，这本书对数据库相关知识进行了比较全面且详细的介绍，读完本书，能够对数据库的认识有更加深入的了解">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-10-24T12:14:59.630Z">
+<meta property="og:updated_time" content="2019-10-24T13:43:18.284Z">
 <meta name="twitter:card" content="summary">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
@@ -72,12 +72,14 @@
         isCategory: false,
         fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
         scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
-        search: true
+        search: false
     }
 </script>
 
 
-    <script> yiliaConfig.jquery_ui = [false]; </script>
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
 
 
 
@@ -104,13 +106,6 @@
 
         
 
-        
-            <form id="search-form">
-            <input type="text" id="local-search-input" name="q" placeholder="search..." class="search form-control" autocomplete="off" autocorrect="off" searchonload="" />
-            <i class="fa fa-times" onclick="resetSearch()"></i>
-            </form>
-            <div id="local-search-result"></div>
-            <p class='no-result'>No results found <i class='fa fa-spinner fa-pulse'></i></p>
         
 
 
@@ -194,7 +189,7 @@
                 
                 <section class="switch-part switch-part2">
                     <div class="widget tagcloud" id="js-tagcloud">
-                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/database/" rel="tag">database</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%8D%9A%E5%AE%A2/" rel="tag">博客</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%AE%B9%E5%99%A8%E7%B1%BB/" rel="tag">容器类</a></li></ul>
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/MapReduce/" rel="tag">MapReduce</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/NoSql/" rel="tag">NoSql</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" rel="tag">关系模型</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%8D%9A%E5%AE%A2/" rel="tag">博客</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%AE%B9%E5%99%A8%E7%B1%BB/" rel="tag">容器类</a></li></ul>
                     </div>
                 </section>
                 
@@ -217,7 +212,7 @@
                 
                 <section class="switch-part switch-part4">
                 
-                    <div id="js-aboutme">专注于前端</div>
+                    <div id="js-aboutme">None</div>
                 </section>
                 
             </div>
@@ -303,13 +298,13 @@
       <div class="article-info article-info-post">
         
     <div class="article-category tagcloud">
-    <a class="article-category-link" href="../../../../categories/%E7%AC%94%E8%AE%B0/">笔记</a>
+    <a class="article-category-link" href="../../../../categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
     </div>
 
 
         
     <div class="article-tag tagcloud">
-        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="../../../../tags/database/" rel="tag">database</a></li></ul>
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="../../../../tags/MapReduce/" rel="tag">MapReduce</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="../../../../tags/NoSql/" rel="tag">NoSql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="../../../../tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" rel="tag">关系模型</a></li></ul>
     </div>
 
         <div class="clearfix"></div>
@@ -374,7 +369,7 @@
         <p><span>本文标题:</span><a href="">数据密集型应用设计学习笔记</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">Leer0</a></p>
         <p><span>发布时间:</span>2019-10-24, 18:26:30</p>
-        <p><span>最后更新:</span>2019-10-24, 20:14:59</p>
+        <p><span>最后更新:</span>2019-10-24, 21:43:18</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="" title="数据密集型应用设计学习笔记">http://yoursite.com/2019/10/24/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</a>
             <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2019/10/24/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/　　作者: Leer0" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
