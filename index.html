@@ -130,6 +130,23 @@
 <p>然后在浏览器输入<code>https://leer0.github.io</code></p>
 <p><img src="/2019/10/24/hexo-github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/hexo-success.PNG" alt></p>
 <p>大功告成</p>
+<h3 id="五、相关问题"><a href="#五、相关问题" class="headerlink" title="五、相关问题"></a>五、相关问题</h3><h4 id="1、解决markdown文章图片无法显示问题"><a href="#1、解决markdown文章图片无法显示问题" class="headerlink" title="1、解决markdown文章图片无法显示问题"></a>1、解决markdown文章图片无法显示问题</h4><p>(1) 首先修改_config.yml的如下字段</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">post_asset_folder:true</span><br></pre></td></tr></table></figure>
+
+<p>当您设置 post_asset_folder 参数后，在建立文件时，Hexo 会自动建立一个与文章同名的文件夹，您可以把与该文章相关的所有资源都放到此文件夹内，这样就可以更方便的使用资源。</p>
+<p>(2) 然后到博客根目录下执行如下语句来安装hexo-assert-image插件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install https://github.com/CodeFalling/hexo-asset-image --save</span><br></pre></td></tr></table></figure>
+
+<p>(3) 安装完成之后，来测试一下</p>
+<p>首先新建一个test文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new test</span><br></pre></td></tr></table></figure>
+
+<p>此时在source/_post路径下会生成下两个文件</p>
+<ul>
+<li>test.md</li>
+<li>test文件夹</li>
+</ul>
+<p>将图片放入test文件夹，在test.md使用相对路径访问图片即可</p>
 
       
     </div>
