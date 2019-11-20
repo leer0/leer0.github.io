@@ -15,15 +15,15 @@
 
 
 
-<meta name="description" content="ZooKeeper——分布式协调服务 Part One什么是ZooKeeper？ZooKeeper是一个开源且高可用的分布式数据管理与系统协调框架，由yahoo创建，是Google Chubby的开源实现。它基于Paxos算法实现了分布式环境中数据的强一致性。 值得注意的是，ZooKeeper并非天生就是为了这些应用场景设计的，都是后来众多开发者根据其框架的特性，利用其提供的一系列API接口（或者">
+<meta name="description" content="什么是ZooKeeper？ZooKeeper是一个开源且高可用的分布式数据管理与系统协调框架，由yahoo创建，是Google Chubby的开源实现。它基于Paxos算法实现了分布式环境中数据的强一致性。 值得注意的是，ZooKeeper并非天生就是为了这些应用场景设计的，都是后来众多开发者根据其框架的特性，利用其提供的一系列API接口（或者称为原语集），摸索出来的典型使用方法。 ZooKeep">
 <meta name="keywords" content="ZooKeeper,分布式">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ZooKeeper——分布式协调服务-Partrtrt_One">
-<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;11&#x2F;13&#x2F;ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1-Partrtrt-One&#x2F;index.html">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;11&#x2F;13&#x2F;ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1%EF%BC%88%E4%B8%80%EF%BC%89&#x2F;index.html">
 <meta property="og:site_name" content="Leer0&#39;s Blog">
-<meta property="og:description" content="ZooKeeper——分布式协调服务 Part One什么是ZooKeeper？ZooKeeper是一个开源且高可用的分布式数据管理与系统协调框架，由yahoo创建，是Google Chubby的开源实现。它基于Paxos算法实现了分布式环境中数据的强一致性。 值得注意的是，ZooKeeper并非天生就是为了这些应用场景设计的，都是后来众多开发者根据其框架的特性，利用其提供的一系列API接口（或者">
+<meta property="og:description" content="什么是ZooKeeper？ZooKeeper是一个开源且高可用的分布式数据管理与系统协调框架，由yahoo创建，是Google Chubby的开源实现。它基于Paxos算法实现了分布式环境中数据的强一致性。 值得注意的是，ZooKeeper并非天生就是为了这些应用场景设计的，都是后来众多开发者根据其框架的特性，利用其提供的一系列API接口（或者称为原语集），摸索出来的典型使用方法。 ZooKeep">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-11-17T15:00:18.049Z">
+<meta property="og:updated_time" content="2019-11-20T14:18:08.135Z">
 <meta name="twitter:card" content="summary">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
@@ -270,7 +270,7 @@
     </div>
     <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
 </nav>
-      <div class="body-wrap"><article id="post-ZooKeeper——分布式协调服务-Partrtrt-One" class="article article-type-post" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-ZooKeeper——分布式协调服务（一）" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
       <a href="" class="article-date">
@@ -314,7 +314,7 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <h1 id="ZooKeeper——分布式协调服务-Part-One"><a href="#ZooKeeper——分布式协调服务-Part-One" class="headerlink" title="ZooKeeper——分布式协调服务 Part One"></a>ZooKeeper——分布式协调服务 Part One</h1><h3 id="什么是ZooKeeper？"><a href="#什么是ZooKeeper？" class="headerlink" title="什么是ZooKeeper？"></a>什么是ZooKeeper？</h3><p>ZooKeeper是一个开源且高可用的<strong>分布式数据管理与系统协调</strong>框架，由yahoo创建，是Google <strong>Chubby的开源实现</strong>。它基于Paxos算法实现了分布式环境中数据的强一致性。</p>
+        <h3 id="什么是ZooKeeper？"><a href="#什么是ZooKeeper？" class="headerlink" title="什么是ZooKeeper？"></a>什么是ZooKeeper？</h3><p>ZooKeeper是一个开源且高可用的<strong>分布式数据管理与系统协调</strong>框架，由yahoo创建，是Google <strong>Chubby的开源实现</strong>。它基于Paxos算法实现了分布式环境中数据的强一致性。</p>
 <p>值得注意的是，ZooKeeper并非天生就是为了这些应用场景设计的，都是后来众多开发者根据其框架的特性，利用其提供的一系列API接口（或者称为原语集），摸索出来的典型使用方法。</p>
 <p>ZooKeeper是用于维护配置信息，命名，提供分布式同步和提供组服务的集中式服务。所有这些类型的服务都以某种形式或由分布式应用程序使用。每次实施它们时，都会进行很多工作来修复不可避免的错误和竞争条件。由于难以实现这类服务，因此应用程序最初通常会跳过它们，这会使它们在存在更改的情况下变得脆弱并且难以管理。即使部署正确，这些服务的不同实现也会导致管理复杂。</p>
 <p>ZooKeeper旨在将这些不同服务的本质提炼成一个非常简单的界面，以实现集中式协调服务。服务本身是分布式的，并且高度可靠。服务将实现共识，组管理和状态协议，因此应用程序不需要自己实现它们。这些应用程序的特定用途将包括Zoo Keeper的特定组件和特定于应用程序的约定的混合。ZooKeeper食谱展示了如何使用此简单服务来构建功能更强大的抽象。</p>
@@ -333,10 +333,10 @@
         <p><span>本文标题:</span><a href="">ZooKeeper——分布式协调服务-Partrtrt_One</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">Leer0</a></p>
         <p><span>发布时间:</span>2019-11-13, 19:57:18</p>
-        <p><span>最后更新:</span>2019-11-17, 23:00:18</p>
+        <p><span>最后更新:</span>2019-11-20, 22:18:08</p>
         <p>
-            <span>原始链接:</span><a class="post-url" href="" title="ZooKeeper——分布式协调服务-Partrtrt_One">http://yoursite.com/2019/11/13/ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1-Partrtrt-One/</a>
-            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2019/11/13/ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1-Partrtrt-One/　　作者: Leer0" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <span>原始链接:</span><a class="post-url" href="" title="ZooKeeper——分布式协调服务-Partrtrt_One">http://yoursite.com/2019/11/13/ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1%EF%BC%88%E4%B8%80%EF%BC%89/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2019/11/13/ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1%EF%BC%88%E4%B8%80%EF%BC%89/　　作者: Leer0" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
             <script> var clipboard = new Clipboard('.copy-path'); </script>
         </p>
         <p>
@@ -369,7 +369,7 @@
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ZooKeeper——分布式协调服务-Part-One"><span class="toc-number">1.</span> <span class="toc-text">ZooKeeper——分布式协调服务 Part One</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#什么是ZooKeeper？"><span class="toc-number">1.0.1.</span> <span class="toc-text">什么是ZooKeeper？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Paxos算法"><span class="toc-number">1.0.1.1.</span> <span class="toc-text">Paxos算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#数据一致性"><span class="toc-number">1.0.1.2.</span> <span class="toc-text">数据一致性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZooKeeper典型应用场景"><span class="toc-number">1.0.2.</span> <span class="toc-text">ZooKeeper典型应用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#数据发布与订阅-配置中心"><span class="toc-number">1.0.2.1.</span> <span class="toc-text">数据发布与订阅(配置中心)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#负载均衡"><span class="toc-number">1.0.2.2.</span> <span class="toc-text">负载均衡</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#命名服务"><span class="toc-number">1.0.2.3.</span> <span class="toc-text">命名服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分布式通知-协调"><span class="toc-number">1.0.2.4.</span> <span class="toc-text">分布式通知/协调</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#集群管理与Master选举"><span class="toc-number">1.0.2.5.</span> <span class="toc-text">集群管理与Master选举</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分布式锁"><span class="toc-number">1.0.2.6.</span> <span class="toc-text">分布式锁</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分布式队列"><span class="toc-number">1.0.2.7.</span> <span class="toc-text">分布式队列</span></a></li></ol></li></ol></li></ol></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#什么是ZooKeeper？"><span class="toc-number">1.</span> <span class="toc-text">什么是ZooKeeper？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Paxos算法"><span class="toc-number">1.1.</span> <span class="toc-text">Paxos算法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#数据一致性"><span class="toc-number">1.2.</span> <span class="toc-text">数据一致性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ZooKeeper典型应用场景"><span class="toc-number">2.</span> <span class="toc-text">ZooKeeper典型应用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#数据发布与订阅-配置中心"><span class="toc-number">2.1.</span> <span class="toc-text">数据发布与订阅(配置中心)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#负载均衡"><span class="toc-number">2.2.</span> <span class="toc-text">负载均衡</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#命名服务"><span class="toc-number">2.3.</span> <span class="toc-text">命名服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分布式通知-协调"><span class="toc-number">2.4.</span> <span class="toc-text">分布式通知/协调</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#集群管理与Master选举"><span class="toc-number">2.5.</span> <span class="toc-text">集群管理与Master选举</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分布式锁"><span class="toc-number">2.6.</span> <span class="toc-text">分布式锁</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#分布式队列"><span class="toc-number">2.7.</span> <span class="toc-text">分布式队列</span></a></li></ol></li></ol>
         
     </div>
     <style>

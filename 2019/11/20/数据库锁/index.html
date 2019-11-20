@@ -15,15 +15,15 @@
 
 
 
-<meta name="description" content="数据库锁数据库锁总结下来有如下几种：悲观锁、乐观锁、表锁、行锁（临间锁、间隙锁、记录锁）、共享锁、排他锁、意向共享锁、意向排他锁等。 悲观锁与乐观锁什么是悲观锁？悲观锁是基于一种悲观的态度类来防止一切数据冲突，它是以一种预防的姿态在修改数据之前把数据锁住，然后再对数据进行读写，在它释放锁之前任何人都不能对其数据进行操作，直到前面一个人把锁释放后下一个人才可对数据进行加锁，然后对数据进行操作，一般数">
+<meta name="description" content="数据库锁总结下来有如下几种：悲观锁、乐观锁、表锁、行锁（临间锁、间隙锁、记录锁）、共享锁、排他锁、意向共享锁、意向排他锁等。 悲观锁与乐观锁什么是悲观锁？悲观锁是基于一种悲观的态度类来防止一切数据冲突，它是以一种预防的姿态在修改数据之前把数据锁住，然后再对数据进行读写，在它释放锁之前任何人都不能对其数据进行操作，直到前面一个人把锁释放后下一个人才可对数据进行加锁，然后对数据进行操作，一般数据库本身">
 <meta name="keywords" content="database,数据库锁">
 <meta property="og:type" content="article">
 <meta property="og:title" content="数据库锁">
 <meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;11&#x2F;20&#x2F;%E6%95%B0%E6%8D%AE%E5%BA%93%E9%94%81&#x2F;index.html">
 <meta property="og:site_name" content="Leer0&#39;s Blog">
-<meta property="og:description" content="数据库锁数据库锁总结下来有如下几种：悲观锁、乐观锁、表锁、行锁（临间锁、间隙锁、记录锁）、共享锁、排他锁、意向共享锁、意向排他锁等。 悲观锁与乐观锁什么是悲观锁？悲观锁是基于一种悲观的态度类来防止一切数据冲突，它是以一种预防的姿态在修改数据之前把数据锁住，然后再对数据进行读写，在它释放锁之前任何人都不能对其数据进行操作，直到前面一个人把锁释放后下一个人才可对数据进行加锁，然后对数据进行操作，一般数">
+<meta property="og:description" content="数据库锁总结下来有如下几种：悲观锁、乐观锁、表锁、行锁（临间锁、间隙锁、记录锁）、共享锁、排他锁、意向共享锁、意向排他锁等。 悲观锁与乐观锁什么是悲观锁？悲观锁是基于一种悲观的态度类来防止一切数据冲突，它是以一种预防的姿态在修改数据之前把数据锁住，然后再对数据进行读写，在它释放锁之前任何人都不能对其数据进行操作，直到前面一个人把锁释放后下一个人才可对数据进行加锁，然后对数据进行操作，一般数据库本身">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-11-20T09:48:40.374Z">
+<meta property="og:updated_time" content="2019-11-20T14:17:29.443Z">
 <meta name="twitter:card" content="summary">
 
 <link rel="apple-touch-icon" href= "/apple-touch-icon.png">
@@ -314,7 +314,7 @@
     <div class="article-entry" itemprop="articleBody">
       
           
-        <h1 id="数据库锁"><a href="#数据库锁" class="headerlink" title="数据库锁"></a>数据库锁</h1><p>数据库锁总结下来有如下几种：悲观锁、乐观锁、表锁、行锁（临间锁、间隙锁、记录锁）、共享锁、排他锁、意向共享锁、意向排他锁等。</p>
+        <p>数据库锁总结下来有如下几种：悲观锁、乐观锁、表锁、行锁（临间锁、间隙锁、记录锁）、共享锁、排他锁、意向共享锁、意向排他锁等。</p>
 <h3 id="悲观锁与乐观锁"><a href="#悲观锁与乐观锁" class="headerlink" title="悲观锁与乐观锁"></a>悲观锁与乐观锁</h3><h4 id="什么是悲观锁？"><a href="#什么是悲观锁？" class="headerlink" title="什么是悲观锁？"></a>什么是悲观锁？</h4><p>悲观锁是基于一种悲观的态度类来防止一切数据冲突，它是以一种预防的姿态在修改数据之前把数据锁住，然后再对数据进行读写，在它释放锁之前任何人都不能对其数据进行操作，直到前面一个人把锁释放后下一个人才可对数据进行加锁，然后对数据进行操作，一般数据库本身锁的机制都是基于悲观锁的机制实现的;</p>
 <p><strong>特点</strong>：可以完全保证数据的独占性和正确性，因为每次请求都会先对数据进行加锁， 然后进行数据操作，最后再解锁，而加锁释放锁的过程会造成消耗，所以性能不高;</p>
 <h4 id="什么是乐观锁？"><a href="#什么是乐观锁？" class="headerlink" title="什么是乐观锁？"></a>什么是乐观锁？</h4><p>乐观锁是对于数据冲突保持一种乐观态度，操作数据时不会对操作的数据进行加锁（这使得多个任务可以并行的对数据进行操作），只有到数据提交的时候才通过一种机制来验证数据是否存在冲突(一般实现方式是通过加版本号然后进行版本号的对比方式实现);</p>
@@ -336,7 +336,7 @@
         <p><span>本文标题:</span><a href="">数据库锁</a></p>
         <p><span>文章作者:</span><a href="/" title="回到主页">Leer0</a></p>
         <p><span>发布时间:</span>2019-11-20, 16:11:46</p>
-        <p><span>最后更新:</span>2019-11-20, 17:48:40</p>
+        <p><span>最后更新:</span>2019-11-20, 22:17:29</p>
         <p>
             <span>原始链接:</span><a class="post-url" href="" title="数据库锁">http://yoursite.com/2019/11/20/%E6%95%B0%E6%8D%AE%E5%BA%93%E9%94%81/</a>
             <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2019/11/20/%E6%95%B0%E6%8D%AE%E5%BA%93%E9%94%81/　　作者: Leer0" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
@@ -366,7 +366,7 @@
     <div id="toc" class="toc-article">
         <strong class="toc-title">文章目录</strong>
         
-            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#数据库锁"><span class="toc-number">1.</span> <span class="toc-text">数据库锁</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#悲观锁与乐观锁"><span class="toc-number">1.0.1.</span> <span class="toc-text">悲观锁与乐观锁</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#什么是悲观锁？"><span class="toc-number">1.0.1.1.</span> <span class="toc-text">什么是悲观锁？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#什么是乐观锁？"><span class="toc-number">1.0.1.2.</span> <span class="toc-text">什么是乐观锁？</span></a></li></ol></li></ol></li></ol></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#悲观锁与乐观锁"><span class="toc-number">1.</span> <span class="toc-text">悲观锁与乐观锁</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#什么是悲观锁？"><span class="toc-number">1.1.</span> <span class="toc-text">什么是悲观锁？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#什么是乐观锁？"><span class="toc-number">1.2.</span> <span class="toc-text">什么是乐观锁？</span></a></li></ol></li></ol>
         
     </div>
     <style>
@@ -434,7 +434,7 @@
         
     </div>
 
-    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="">数据库锁</a></li><li class="post-list-item"><a class="post-list-link" href="../%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/">数据库事务</a></li><li class="post-list-item"><a class="post-list-link" href="../../17/ubuntu%E5%AE%89%E8%A3%85JDK/">ubuntu安装JDK</a></li><li class="post-list-item"><a class="post-list-link" href="../../14/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2/">数据密集型应用设计——数据库的存储与检索</a></li><li class="post-list-item"><a class="post-list-link" href="../../13/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6/">数据密集型应用设计——分布式数据复制</a></li><li class="post-list-item"><a class="post-list-link" href="../../13/ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1-Partrtrt-One/">ZooKeeper——分布式协调服务-Partrtrt_One</a></li><li class="post-list-item"><a class="post-list-link" href="../../10/%E6%B7%B1%E5%85%A5JVM%E5%86%85%E6%A0%B8/">深入JVM内核</a></li><li class="post-list-item"><a class="post-list-link" href="../../06/CSharp-script-for-Unity-first-part/">CSharp-script-for-Unity-first-part</a></li><li class="post-list-item"><a class="post-list-link" href="../../01/UML%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%BB%BA%E6%A8%A1/">UML面向对象建模</a></li><li class="post-list-item"><a class="post-list-link" href="../../01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/">设计模式之工厂模式</a></li><li class="post-list-item"><a class="post-list-link" href="../../../10/24/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/">数据密集型应用设计学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="../../../10/24/hexo-github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">hexo+github搭建个人博客</a></li><li class="post-list-item"><a class="post-list-link" href="../../../10/24/java%E9%9B%86%E5%90%88%E7%B1%BB/">java集合类</a></li></ul>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="">数据库锁</a></li><li class="post-list-item"><a class="post-list-link" href="../%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/">数据库事务</a></li><li class="post-list-item"><a class="post-list-link" href="../../17/ubuntu%E5%AE%89%E8%A3%85JDK/">ubuntu安装JDK</a></li><li class="post-list-item"><a class="post-list-link" href="../../14/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2/">数据密集型应用设计——数据库的存储与检索</a></li><li class="post-list-item"><a class="post-list-link" href="../../13/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6/">数据密集型应用设计——分布式数据复制</a></li><li class="post-list-item"><a class="post-list-link" href="../../13/ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1%EF%BC%88%E4%B8%80%EF%BC%89/">ZooKeeper——分布式协调服务-Partrtrt_One</a></li><li class="post-list-item"><a class="post-list-link" href="../../10/%E6%B7%B1%E5%85%A5JVM%E5%86%85%E6%A0%B8/">深入JVM内核</a></li><li class="post-list-item"><a class="post-list-link" href="../../06/CSharp-script-for-Unity-first-part/">CSharp-script-for-Unity-first-part</a></li><li class="post-list-item"><a class="post-list-link" href="../../01/UML%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%BB%BA%E6%A8%A1/">UML面向对象建模</a></li><li class="post-list-item"><a class="post-list-link" href="../../01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/">设计模式之工厂模式</a></li><li class="post-list-item"><a class="post-list-link" href="../../../10/24/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/">数据密集型应用设计学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="../../../10/24/hexo-github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">hexo+github搭建个人博客</a></li><li class="post-list-item"><a class="post-list-link" href="../../../10/24/java%E9%9B%86%E5%90%88%E7%B1%BB/">java集合类</a></li></ul>
 
 
 
