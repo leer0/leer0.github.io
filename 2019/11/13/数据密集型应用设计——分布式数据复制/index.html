@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Leer0" />
+
+
+
+<meta name="description" content="分布式数据——复制希望数据复制的原因：  使得数据与用户在地理上接近（从而减少延迟） 即使系统的一部分出现故障，系统也能继续工作（从而提高可用性） 扩展可以接受读请求的机器数量（从而提高读取吞吐量）  复制的困难之处在于处理复制数据的变更（change） 流行的变更数据复制算法：单领导者（single leader），多领导者（multi leader）和无领导者（leaderless） 如何确保">
+<meta name="keywords" content="分布式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据密集型应用设计——分布式数据复制">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;11&#x2F;13&#x2F;%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6&#x2F;index.html">
+<meta property="og:site_name" content="Leer0&#39;s Blog">
+<meta property="og:description" content="分布式数据——复制希望数据复制的原因：  使得数据与用户在地理上接近（从而减少延迟） 即使系统的一部分出现故障，系统也能继续工作（从而提高可用性） 扩展可以接受读请求的机器数量（从而提高读取吞吐量）  复制的困难之处在于处理复制数据的变更（change） 流行的变更数据复制算法：单领导者（single leader），多领导者（multi leader）和无领导者（leaderless） 如何确保">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;11&#x2F;13&#x2F;%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6&#x2F;D:%5CHexo%5Cblog%5Csource_posts%5C%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6%5C%E5%9F%BA%E4%BA%8E%E9%A2%86%E5%AF%BC%E8%80%85(%E4%B8%BB-%E4%BB%8E)%E7%9A%84%E5%A4%8D%E5%88%B6.PNG">
+<meta property="og:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;11&#x2F;13&#x2F;%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6&#x2F;D:%5CHexo%5Cblog%5Csource_posts%5C%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6%5C%E5%9F%BA%E4%BA%8E%E9%A2%86%E5%AF%BC%E8%80%85%E7%9A%84%E5%A4%8D%E5%88%B6%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%90%8C%E6%AD%A5%E4%BB%8E%E5%BA%93%E5%92%8C%E4%B8%80%E4%B8%AA%E5%BC%82%E6%AD%A5%E4%BB%8E%E5%BA%93.PNG">
+<meta property="og:updated_time" content="2019-11-14T14:48:09.486Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;11&#x2F;13&#x2F;%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6&#x2F;D:%5CHexo%5Cblog%5Csource_posts%5C%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6%5C%E5%9F%BA%E4%BA%8E%E9%A2%86%E5%AF%BC%E8%80%85(%E4%B8%BB-%E4%BB%8E)%E7%9A%84%E5%A4%8D%E5%88%B6.PNG">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Leer0&#39;s Blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="../../../../css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>数据密集型应用设计——分布式数据复制 | Leer0&#39;s Blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/xipian.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Leer0</a></h1>
+        </hgroup>
+
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="../../../../index.html">主页</a></li>
+                        
+                            <li><a href="../../../../archives/">所有文章</a></li>
+                        
+                            <li><a href="../../../../tags/">标签云</a></li>
+                        
+                            <li><a href="../../../../about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="../../../../762396001@qq.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="../../../../sina%20weibo" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/leer0" target="_blank" rel="noopener" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="../../../../atom.xml" title="RSS"></a>
+                            
+                                <a class="fa 网易云音乐" href="http://music.163.com/m/user/home?id=270179187" target="_blank" rel="noopener" title="网易云音乐"></a>
+                            
+                                <a class="fa bilibili" href="https://space.bilibili.com/18064566" target="_blank" rel="noopener" title="bilibili"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/DataBase/" rel="tag">DataBase</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/MapReduce/" rel="tag">MapReduce</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/NoSql/" rel="tag">NoSql</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/ZooKeeper/" rel="tag">ZooKeeper</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/database/" rel="tag">database</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/jdk/" rel="tag">jdk</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/transaction/" rel="tag">transaction</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/ubuntu/" rel="tag">ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/uml/" rel="tag">uml</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" rel="tag">关系模型</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%8D%9A%E5%AE%A2/" rel="tag">博客</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%AE%B9%E5%99%A8%E7%B1%BB/" rel="tag">容器类</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/" rel="tag">工厂模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E6%95%B0%E6%8D%AE%E5%BA%93%E9%94%81/" rel="tag">数据库锁</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/" target="_blank" rel="noopener">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/" target="_blank" rel="noopener">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">None</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Leer0</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/xipian.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Leer0</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="../../../../index.html">主页</a></li>
+                
+                    <li><a href="../../../../archives/">所有文章</a></li>
+                
+                    <li><a href="../../../../tags/">标签云</a></li>
+                
+                    <li><a href="../../../../about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="../../../../762396001@qq.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="../../../../sina%20weibo" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/leer0" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="../../../../atom.xml" title="RSS"></a>
+                            
+                                <a class="fa 网易云音乐" target="_blank" href="http://music.163.com/m/user/home?id=270179187" title="网易云音乐"></a>
+                            
+                                <a class="fa bilibili" target="_blank" href="https://space.bilibili.com/18064566" title="bilibili"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-数据密集型应用设计——分布式数据复制" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="" class="article-date">
+      <time datetime="2019-11-13T13:02:02.000Z" itemprop="datePublished">2019-11-13</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      数据密集型应用设计——分布式数据复制
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="../../../../categories/Big-Data/">Big Data</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="../../../../tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h1 id="分布式数据——复制"><a href="#分布式数据——复制" class="headerlink" title="分布式数据——复制"></a>分布式数据——复制</h1><p>希望数据复制的原因：</p>
+<ul>
+<li>使得数据与用户在地理上接近（从而减少延迟）</li>
+<li>即使系统的一部分出现故障，系统也能继续工作（从而提高可用性）</li>
+<li>扩展可以接受读请求的机器数量（从而提高读取吞吐量）</li>
+</ul>
+<p>复制的<strong>困难之处</strong>在于<strong>处理复制数据的变更</strong>（change）</p>
+<p>流行的<strong>变更</strong>数据复制算法：单领导者（single leader），多领导者（multi leader）和无领导者（leaderless）</p>
+<p>如何确保所有数据都落在了所有的副本上？</p>
+<p>解决方案：为基于领导者的复制（leader-based replication）（也称主动/被动<br>（active/passive） 或 主/从（master/slave）复制）</p>
+<p><img src="/2019/11/13/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6/D:%5CHexo%5Cblog%5Csource_posts%5C%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6%5C%E5%9F%BA%E4%BA%8E%E9%A2%86%E5%AF%BC%E8%80%85(%E4%B8%BB-%E4%BB%8E)%E7%9A%84%E5%A4%8D%E5%88%B6.PNG" alt></p>
+<p>它的工作原理如下：</p>
+<ol>
+<li><p>副本之一被指定为领导者（leader），也称为 主库（master） ，首要（primary）。当客户端要向数据库写入时，它必须将请求发送给领导者，领导者会将新数据写入其本地存储。</p>
+</li>
+<li><p>其他副本被称为追随者（followers），亦称为只读副本（read replicas），从库（slaves），次要（ sencondaries），<strong>热备</strong>（hot-standby） 。每当领导者将新数据写入本地存储时，它也会将数据变更发送给所有的追随者，称之为复制日志（replicationlog）记录或变更流（change stream）。每个跟随者从领导者拉取日志，并相应更新其本地数据库副本，方法是按照领导者处理的相同顺序应用所有写入。</p>
+</li>
+<li><p>当客户想要从数据库中读取数据时，它可以向领导者或追随者查询。 但只有领导者才能接受写操作（从客户端的角度来看从库都是只读的）。</p>
+<p><code>不同的人对热（hot），温（warn），冷（cold） 备份服务器有不同的定义。 例如在PostgreSQL中，热备（hot standby）指的是能接受客户端读请求的副本。而温备（warm standby）只是追随领导者，但不处理客户端的任何查询。 就本书而言，这些差异并不重要。</code> </p>
+</li>
+</ol>
+<h3 id="同步复制与异步复制"><a href="#同步复制与异步复制" class="headerlink" title="同步复制与异步复制"></a>同步复制与异步复制</h3><p><img src="/2019/11/13/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6/D:%5CHexo%5Cblog%5Csource_posts%5C%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6%5C%E5%9F%BA%E4%BA%8E%E9%A2%86%E5%AF%BC%E8%80%85%E7%9A%84%E5%A4%8D%E5%88%B6%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%90%8C%E6%AD%A5%E4%BB%8E%E5%BA%93%E5%92%8C%E4%B8%80%E4%B8%AA%E5%BC%82%E6%AD%A5%E4%BB%8E%E5%BA%93.PNG" alt></p>
+<p>同步复制<strong>优缺点</strong></p>
+<p><strong>优点</strong>：从库保证了与主库一直的最新数据副本。如果主库突然失效，仍可以从同步从库中找到数据。</p>
+<p><strong>缺点</strong>：如果从库没有响应（比如它已崩溃，或者出现网络故障或其他原因），主库就无法处理写入操作。主库必须组织所有的写入，等到同步副本再次可用为止。</p>
+<p>如果在数据库上启用同步复制，通常意味着其中一个跟随者是同步的，而其他的则是异步的。如果同步从库变得不可用或缓慢，则使一个异步从库变为同步从库。这保证你至少在两个节点上拥有最新的数据副本：主库和同步从库。 这种配置有时也被称为<strong>半同步</strong>（semi-synchronous）</p>
+<p>通常情况下，基于领导者的复制都配置为完全异步。 在这种情况下，如果主库失效且不可恢复，则任何尚未复制给从库的写入都会丢失。 这意味着即使已经向客户端确认成功，写入也不能保证持久（Durable）。 然而，一个完全异步的配置也有优点：即使所有的从库都落后了，主库也可以继续处理写入。</p>
+<p>对于异步复制系统而言，主库故障时有可能丢失数据。这可能是一个严重的问题，因此研究人员仍在研究不丢数据但仍能提供良好性能和可用性的复制方法。 例如，链式复制是同步复制的一种变体，已经在一些系统（如Microsoft Azure存储）中成功实现。</p>
+<h3 id="设置新从库"><a href="#设置新从库" class="headerlink" title="设置新从库"></a>设置新从库</h3><h3 id="处理节点宕机"><a href="#处理节点宕机" class="headerlink" title="处理节点宕机"></a>处理节点宕机</h3><h4 id="从库失效：追赶恢复"><a href="#从库失效：追赶恢复" class="headerlink" title="从库失效：追赶恢复"></a>从库失效：追赶恢复</h4><p>在其本地磁盘上，每个从库记录从主库收到的数据变更。如果从库崩溃并重新启动，或者，如果主库和从库之间的网络暂时中断，则比较容易恢复：从库可以从日志中知道，在发生故障之前处理的最后一个事务。因此，从库可以连接到主库，并请求在从库断开连接时发生的所有数据变更。当应用完所有这些变化后，它就赶上了主库，并可以像以前一样继续接收数据变更流。</p>
+<h4 id="主库失效：故障切换"><a href="#主库失效：故障切换" class="headerlink" title="主库失效：故障切换"></a>主库失效：故障切换</h4><p>故障切换：将其中一个从库提升为新的主库，从新配置客户端，已将他们的写操作发送给新的主库，其他从库需要开始拉取新主库的数据变更。</p>
+<p>自动故障切换过程：</p>
+<p>1、确认主库失效：大多数系统只是简单使用超时（Timeout）：节点频繁<br>地相互来回传递消息，并且如果一个节点在一段时间内（例如30秒）没有响应，就认为它挂了（因为计划内维护而故意关闭主库不算）。</p>
+<p>2、选择一个新的主库：这可以通过<strong>选举</strong>过程（主库由剩余副本以多数选举产生）来完成，或者可以由之前选定的控制器节点（controller node）来指定新的主库。主库的最佳人选通常是拥有旧主库最新数据副本的从库（最小化数据损失）。让所有的节点同意一个新的领导者，是一个<strong>共识问题</strong>。</p>
+<p>3、从新配置系统以启用新的主库：客户端需要将他们的写请求发送给新的主库。如果老的主库恢复了，需要认可新的主库，成为一个从库。</p>
+<p>故障切换会出现的问题：</p>
+<ul>
+<li>如果使用异步复制，则新主库可能没有收到老主库宕机前最后的写入操作。在选出新主库后，如果老主库重新加入集群，新主库在此期间可能会收到冲突的写入，那这些写入该如何处理？最常见的解决方案是简单丢弃老主库未复制的写入，这很可能打破客户对于数据持久性的期望。</li>
+<li>如果数据库需要和其他外部存储相协调，那么丢弃写入内容是极其危险的操作。例如在GitHub的一场事故中，一个过时的MySQL从库被提升为主库。数据库使用自增ID作为主键，因为新主库的计数器落后于老主库的计数器，所以新主库重新分配了一些已经被老主库分配掉的ID作为主键。这些主键也在Redis中使用，主键重用使得MySQL和Redis中数据产生不一致，最后导致一些私有数据泄漏到错误的用户手中。</li>
+<li>发生某些故障时可能会出现两个节点都以为自己是主库的情况。这种情况称为脑裂(split brain)，非常危险：如果两个主库都可以接受写操作，却没有冲突解决机制（参见“多领导者复制”），那么数据就可能丢失或损坏。一些系统采取了安全防范措施：当检测到两个主库节点同时存在时会关闭其中一个节点 ，但设计粗糙的机制可能最后会导致两个节点都被关闭。</li>
+<li>主库被宣告死亡之前的正确超时应该怎么配置？在主库失效的情况下，超时时间越长，意味着恢复时间也越长。但是如果超时设置太短，又可能会出现不必要的故障切换。例如，临时负载峰值可能导致节点的响应时间超时，或网络故障可能导致数据包延迟。如果系统已经处于高负载或网络问题的困扰之中，那么不必要的故障切换可能会让情况变得更糟糕。</li>
+</ul>
+<p>这些问题没有简单的解决方案。因此，即使软件支持自动故障切换，不少运维团队还是更愿意手动执行故障切换。</p>
+<h3 id="复制日志的实现"><a href="#复制日志的实现" class="headerlink" title="复制日志的实现"></a>复制日志的实现</h3><h4 id="基于语句的复制"><a href="#基于语句的复制" class="headerlink" title="基于语句的复制"></a>基于语句的复制</h4><p>主库记录下它执行的每一个写入请求，并将该语句日志发送给其他从库。对于关系数据库来说，这意味着每个 INSERT ， UPDATE 或 DELETE 语句都被转发给每个从库，每个从库解析并执行该SQL语句，就像从客户端收到一样。</p>
+<p>该复制方式的问题：</p>
+<ul>
+<li>任何调用<strong>非确定性函数</strong>（nondeterministic）的语句，可能会在每个副本上生成不同的值。例如，使用 NOW() 获取当前日期时间，或使用 RAND() 获取一个随机数。</li>
+<li>如果语句使用了<strong>自增列</strong>（auto increment），或者依赖于数据库中的<strong>现有数据</strong>（例如， <code>UPDATE ... WHERE &lt;某些条件&gt;</code> ），则必须在每个副本上按照完全相同的顺序执行它们，否则可能会产生不同的效果。当有多个并发执行的事务时，这可能成为一个限制。</li>
+<li>有<strong>副作用</strong>的语句（例如，触发器，存储过程，用户定义的函数）可能会在每个副本上产生不同的副作用，除非副作用是绝对确定的。</li>
+</ul>
+<h4 id="传输预写式日志（WAL"><a href="#传输预写式日志（WAL" class="headerlink" title="传输预写式日志（WAL)"></a>传输预写式日志（WAL)</h4><h4 id="逻辑日志复制（基于行）"><a href="#逻辑日志复制（基于行）" class="headerlink" title="逻辑日志复制（基于行）"></a>逻辑日志复制（基于行）</h4><h4 id="基于触发器的复制"><a href="#基于触发器的复制" class="headerlink" title="基于触发器的复制"></a>基于触发器的复制</h4>
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="">数据密集型应用设计——分布式数据复制</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Leer0</a></p>
+        <p><span>发布时间:</span>2019-11-13, 21:02:02</p>
+        <p><span>最后更新:</span>2019-11-14, 22:48:09</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="" title="数据密集型应用设计——分布式数据复制">http://yoursite.com/2019/11/13/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2019/11/13/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6/　　作者: Leer0" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="../../14/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2/">
+                    数据密集型应用设计——数据库的存储与检索
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="../ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1-Partrtrt-One/">
+                    ZooKeeper——分布式协调服务-Partrtrt_One
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#分布式数据——复制"><span class="toc-number">1.</span> <span class="toc-text">分布式数据——复制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#同步复制与异步复制"><span class="toc-number">1.0.1.</span> <span class="toc-text">同步复制与异步复制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#设置新从库"><span class="toc-number">1.0.2.</span> <span class="toc-text">设置新从库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#处理节点宕机"><span class="toc-number">1.0.3.</span> <span class="toc-text">处理节点宕机</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#从库失效：追赶恢复"><span class="toc-number">1.0.3.1.</span> <span class="toc-text">从库失效：追赶恢复</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#主库失效：故障切换"><span class="toc-number">1.0.3.2.</span> <span class="toc-text">主库失效：故障切换</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#复制日志的实现"><span class="toc-number">1.0.4.</span> <span class="toc-text">复制日志的实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#基于语句的复制"><span class="toc-number">1.0.4.1.</span> <span class="toc-text">基于语句的复制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#传输预写式日志（WAL"><span class="toc-number">1.0.4.2.</span> <span class="toc-text">传输预写式日志（WAL)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#逻辑日志复制（基于行）"><span class="toc-number">1.0.4.3.</span> <span class="toc-text">逻辑日志复制（基于行）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#基于触发器的复制"><span class="toc-number">1.0.4.4.</span> <span class="toc-text">基于触发器的复制</span></a></li></ol></li></ol></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-6 i,
+        .toc-level-6 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"数据密集型应用设计——分布式数据复制　| Leer0's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="../../14/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2/" title="上一篇: 数据密集型应用设计——数据库的存储与检索">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="../ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1-Partrtrt-One/" title="下一篇: ZooKeeper——分布式协调服务-Partrtrt_One">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="../../20/%E6%95%B0%E6%8D%AE%E5%BA%93%E9%94%81/">数据库锁</a></li><li class="post-list-item"><a class="post-list-link" href="../../20/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/">数据库事务</a></li><li class="post-list-item"><a class="post-list-link" href="../../17/ubuntu%E5%AE%89%E8%A3%85JDK/">ubuntu安装JDK</a></li><li class="post-list-item"><a class="post-list-link" href="../../14/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2/">数据密集型应用设计——数据库的存储与检索</a></li><li class="post-list-item"><a class="post-list-link" href="">数据密集型应用设计——分布式数据复制</a></li><li class="post-list-item"><a class="post-list-link" href="../ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1-Partrtrt-One/">ZooKeeper——分布式协调服务-Partrtrt_One</a></li><li class="post-list-item"><a class="post-list-link" href="../../10/%E6%B7%B1%E5%85%A5JVM%E5%86%85%E6%A0%B8/">深入JVM内核</a></li><li class="post-list-item"><a class="post-list-link" href="../../06/CSharp-script-for-Unity-first-part/">CSharp-script-for-Unity-first-part</a></li><li class="post-list-item"><a class="post-list-link" href="../../01/UML%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%BB%BA%E6%A8%A1/">UML面向对象建模</a></li><li class="post-list-item"><a class="post-list-link" href="../../01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/">设计模式之工厂模式</a></li><li class="post-list-item"><a class="post-list-link" href="../../../10/24/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/">数据密集型应用设计学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="../../../10/24/hexo-github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">hexo+github搭建个人博客</a></li><li class="post-list-item"><a class="post-list-link" href="../../../10/24/java%E9%9B%86%E5%90%88%E7%B1%BB/">java集合类</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2019 Leer0
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>

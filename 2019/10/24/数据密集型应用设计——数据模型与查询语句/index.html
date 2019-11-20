@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+
+    <!--[if lt IE 9]>
+        <style>body {display: none; background: none !important} </style>
+        <meta http-equiv="Refresh" Content="0; url=//outdatedbrowser.com/" />
+    <![endif]-->
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone=no" />
+<meta name="author" content="Leer0" />
+
+
+
+<meta name="description" content="这是一篇对于数据密集型应用一书的学习笔记，主要记载书中所涉及重点内容的粗略记录，这本书对数据库相关知识进行了比较全面且详细的介绍，读完本书，能够对数据库的认识有更加深入的了解">
+<meta name="keywords" content="关系模型,NoSql,MapReduce">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据密集型应用设计学习笔记">
+<meta property="og:url" content="http:&#x2F;&#x2F;yoursite.com&#x2F;2019&#x2F;10&#x2F;24&#x2F;%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5&#x2F;index.html">
+<meta property="og:site_name" content="Leer0&#39;s Blog">
+<meta property="og:description" content="这是一篇对于数据密集型应用一书的学习笔记，主要记载书中所涉及重点内容的粗略记录，这本书对数据库相关知识进行了比较全面且详细的介绍，读完本书，能够对数据库的认识有更加深入的了解">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-10-24T13:43:18.284Z">
+<meta name="twitter:card" content="summary">
+
+<link rel="apple-touch-icon" href= "/apple-touch-icon.png">
+
+
+    <link rel="alternate" href="/atom.xml" title="Leer0&#39;s Blog" type="application/atom+xml">
+
+
+
+    <link rel="shortcut icon" href="/favicon.png">
+
+
+
+    <link href="//cdn.bootcss.com/animate.css/3.5.1/animate.min.css" rel="stylesheet">
+
+
+
+    <link href="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.css" rel="stylesheet">
+
+
+
+    <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+    <link href="//cdn.bootcss.com/pace/1.0.2/themes/blue/pace-theme-minimal.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="../../../../css/style.css">
+
+
+
+<link href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+
+
+<title>数据密集型应用设计学习笔记 | Leer0&#39;s Blog</title>
+
+<script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+<script>
+    var yiliaConfig = {
+        fancybox: true,
+        animate: true,
+        isHome: false,
+        isPost: true,
+        isArchive: false,
+        isTag: false,
+        isCategory: false,
+        fancybox_js: "//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.min.js",
+        scrollreveal: "//cdn.bootcss.com/scrollReveal.js/3.1.4/scrollreveal.min.js",
+        search: false
+    }
+</script>
+
+
+    <script>
+        yiliaConfig.jquery_ui = [true, "//cdn.bootcss.com/jqueryui/1.10.4/jquery-ui.min.js", "//cdn.bootcss.com/jqueryui/1.10.4/css/jquery-ui.min.css"];
+    </script>
+
+
+
+    <script> yiliaConfig.rootUrl = "\/";</script>
+
+
+
+
+
+
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            <img src="/img/xipian.jpg" class="animated zoomIn">
+        </a>
+        <hgroup>
+          <h1 class="header-author"><a href="/">Leer0</a></h1>
+        </hgroup>
+
+        
+
+        
+
+
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="../../../../index.html">主页</a></li>
+                        
+                            <li><a href="../../../../archives/">所有文章</a></li>
+                        
+                            <li><a href="../../../../tags/">标签云</a></li>
+                        
+                            <li><a href="../../../../about/">关于我</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" href="../../../../762396001@qq.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" href="../../../../sina%20weibo" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" href="https://github.com/leer0" target="_blank" rel="noopener" title="GitHub"></a>
+                            
+                                <a class="fa RSS" href="../../../../atom.xml" title="RSS"></a>
+                            
+                                <a class="fa 网易云音乐" href="http://music.163.com/m/user/home?id=270179187" target="_blank" rel="noopener" title="网易云音乐"></a>
+                            
+                                <a class="fa bilibili" href="https://space.bilibili.com/18064566" target="_blank" rel="noopener" title="bilibili"></a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/DataBase/" rel="tag">DataBase</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/MapReduce/" rel="tag">MapReduce</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/NoSql/" rel="tag">NoSql</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/ZooKeeper/" rel="tag">ZooKeeper</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/database/" rel="tag">database</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/hexo/" rel="tag">hexo</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/java/" rel="tag">java</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/jdk/" rel="tag">jdk</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/transaction/" rel="tag">transaction</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/ubuntu/" rel="tag">ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/uml/" rel="tag">uml</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" rel="tag">关系模型</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">创建型设计模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%8D%9A%E5%AE%A2/" rel="tag">博客</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%AE%B9%E5%99%A8%E7%B1%BB/" rel="tag">容器类</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/" rel="tag">工厂模式</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E6%95%B0%E6%8D%AE%E5%BA%93%E9%94%81/" rel="tag">数据库锁</a></li><li class="tag-list-item"><a class="tag-list-link" href="../../../../tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a></li></ul>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="https://pages.github.com/" target="_blank" rel="noopener">GitHub</a>
+                    
+                      <a class="main-nav-link switch-friends-link" href="http://moxfive.xyz/" target="_blank" rel="noopener">MOxFIVE</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">None</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">Leer0</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                <img src="/img/xipian.jpg" class="animated zoomIn">
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">Leer0</a></h1>
+            </hgroup>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="../../../../index.html">主页</a></li>
+                
+                    <li><a href="../../../../archives/">所有文章</a></li>
+                
+                    <li><a href="../../../../tags/">标签云</a></li>
+                
+                    <li><a href="../../../../about/">关于我</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fa Email" target="_blank" href="../../../../762396001@qq.com" title="Email"></a>
+                            
+                                <a class="fa 新浪微博" target="_blank" href="../../../../sina%20weibo" title="新浪微博"></a>
+                            
+                                <a class="fa GitHub" target="_blank" href="https://github.com/leer0" title="GitHub"></a>
+                            
+                                <a class="fa RSS" target="_blank" href="../../../../atom.xml" title="RSS"></a>
+                            
+                                <a class="fa 网易云音乐" target="_blank" href="http://music.163.com/m/user/home?id=270179187" title="网易云音乐"></a>
+                            
+                                <a class="fa bilibili" target="_blank" href="https://space.bilibili.com/18064566" title="bilibili"></a>
+                            
+                        </ul>
+            </nav>
+        </header>                
+    </div>
+    <link class="menu-list" tags="标签" friends="友情链接" about="关于我"/>
+</nav>
+      <div class="body-wrap"><article id="post-数据密集型应用设计——数据模型与查询语句" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="" class="article-date">
+      <time datetime="2019-10-24T10:26:30.000Z" itemprop="datePublished">2019-10-24</time>
+</a>
+
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      数据密集型应用设计学习笔记
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="../../../../categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="../../../../tags/MapReduce/" rel="tag">MapReduce</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="../../../../tags/NoSql/" rel="tag">NoSql</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="../../../../tags/%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8B/" rel="tag">关系模型</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <h2 id="数据密集型应用学习笔记"><a href="#数据密集型应用学习笔记" class="headerlink" title="数据密集型应用学习笔记"></a>数据密集型应用学习笔记</h2><h3 id="1、可靠性、可扩展性、可维护性"><a href="#1、可靠性、可扩展性、可维护性" class="headerlink" title="1、可靠性、可扩展性、可维护性"></a>1、可靠性、可扩展性、可维护性</h3><ul>
+<li>可靠性（Reliability）：系统在困境（adversity）（硬件故障、软件故障、人为错误）中人可以正常工作（正确完成功能，并能达到期望的性能水准）</li>
+<li>可扩展性（Scalability）：有合理办法应对系统的增长（数据量、流量、复杂性）</li>
+<li>可维护性（Maintainability）：许多不同的人（工程师、运维）在不同的生命周期，都能高效地在系统上工作（使系统保持现有行为，并适应新的应用场景）</li>
+</ul>
+<h3 id="2、数据模型与查询语言"><a href="#2、数据模型与查询语言" class="headerlink" title="2、数据模型与查询语言"></a>2、数据模型与查询语言</h3><h4 id="关系模型与文档模型"><a href="#关系模型与文档模型" class="headerlink" title="关系模型与文档模型"></a>关系模型与文档模型</h4><h4 id="NoSql"><a href="#NoSql" class="headerlink" title="NoSql"></a>NoSql</h4><p>非关系型、分布式、不提供ACID的数据库设计模式</p>
+<p>Nosql优势：</p>
+<ul>
+<li>易扩展，NoSQL数据库种类繁多，但是一个共同的特点都是去掉关系数据库的关系型特性。</li>
+<li>非常高的读写性能，尤其在大数据量下，同样表现优秀。这得益于它的无关系性，数据库的结构简单。</li>
+</ul>
+<p>NoSql数据库分类：</p>
+<ul>
+<li>键值(Key-Value)存储数据库</li>
+<li>列存储数据库</li>
+<li>文档型数据库</li>
+<li>图形数据库</li>
+</ul>
+<h4 id="采用NoSql数据库的背后几个驱动因素："><a href="#采用NoSql数据库的背后几个驱动因素：" class="headerlink" title="采用NoSql数据库的背后几个驱动因素："></a>采用NoSql数据库的背后几个驱动因素：</h4><ul>
+<li>需要比关系型数据库更好的扩展性，包括非常大的数据集或非常高的写入吞吐量</li>
+<li>相比商业数据库产品，免费和开源软件更受偏爱</li>
+<li>关系模型不能很好的支持一些特殊的查询操作</li>
+<li>受挫于关系模型的限制性，渴望一种更具多动态性与表现力的数据模型</li>
+</ul>
+<h4 id="对象关系不匹配"><a href="#对象关系不匹配" class="headerlink" title="对象关系不匹配"></a>对象关系不匹配</h4><p>如果数据存储在关系表中，那么需要一个笨拙的转换层，处于应用程序代码中的对象和表，行，列的数据库模型之间。模型之间的不连贯有时被称为阻抗不匹配。</p>
+<h4 id="网络模型（CODASYL模型）"><a href="#网络模型（CODASYL模型）" class="headerlink" title="网络模型（CODASYL模型）"></a>网络模型（CODASYL模型）</h4><p>CODASYL模型是层次模型的推广。在层次模型的树结构中，每条记录只有一个父节点；在网络模式中，每条记录可能有多个父节点。</p>
+<p>网络模型中记录之间的链接不是外键，而更像编程语言中的指针（同时仍然存储在磁盘上）。</p>
+<h4 id="文档模型与关系模型对比"><a href="#文档模型与关系模型对比" class="headerlink" title="文档模型与关系模型对比"></a>文档模型与关系模型对比</h4><p>文档数据模型的主要优势是架构灵活性，因局部性而拥有更好的性能，以及对于某些应用程序而言更接近于应用程序使用的数据结构。关系模型的优势使为连接提供更好的支持以及支持多对一和多对多的关系。</p>
+<h4 id="文档中的架构灵活性"><a href="#文档中的架构灵活性" class="headerlink" title="文档中的架构灵活性"></a>文档中的架构灵活性</h4><p>没有模式意味着可以将任意的键和值添加到文档中，并且当读取时，客户端无法保证文档可能包含的字段。</p>
+<p>文档数据库有时称为无模式（schemaless），但这具有误导性，因为读取数据的代码通常假定某种结构——即存在隐式模式，但不由数据库强制执行。一个更精确的术语是读时模式（schema-on-read）（数据的结构是隐含的，只有在数据被读取时才被解释），相应的是写时模式（schema-on-write）（传统的关系数据库方法中，模式明确，且数据库确保所有的数据都符合其模式）</p>
+<p>当由于某种原因（例如，数据是<strong>异构</strong>的）集合中的项目并不都具有相同的结构时,读时模式更具优势。例如，如果：</p>
+<ul>
+<li>存在许多不同类型的对象，将每种类型的对象放在自己的表中是不现实的。</li>
+<li>数据的结构由外部系统决定。你无法控制外部系统且它随时可能变化。</li>
+</ul>
+<h4 id="查询数据的局部性"><a href="#查询数据的局部性" class="headerlink" title="查询数据的局部性"></a>查询数据的局部性</h4><p>文档通常以单个连续字符串形式进行存储，编码为JSON，XML或其二进制变体（如MongoDB的BSON）。如果应用程序经常需要访问整个文档（例如，将其渲染至网页），那么存储局部性会带来性能优势。如果将数据分割到多个表中，则需要进行多次索引查找才能将其全部检索出来，这可能需要更多的磁盘查找并花费更多的时间。</p>
+<h4 id="文档和关系数据库的融合"><a href="#文档和关系数据库的融合" class="headerlink" title="文档和关系数据库的融合"></a>文档和关系数据库的融合</h4><p>自2000年代中期以来，大多数关系数据库系统（MySQL除外）都已支持XML。这包括对XML文档进行本地修改的功能，以及在XML文档中进行索引和查询的功能。这允许应用程序使用那种与文档数据库应当使用的非常类似的数据模型。</p>
+<p>在文档数据库中，RethinkDB在其查询语言中支持类似关系的连接，一些MongoDB驱动程序可以自动解析数据库引用（有效地执行客户端连接，尽管这可能比在数据库中执行的连接慢，需要额外的网络往返，并且优化更少）。</p>
+<h4 id="数据查询语句"><a href="#数据查询语句" class="headerlink" title="数据查询语句"></a>数据查询语句</h4><p><strong>声明式查询语句</strong>：在声明式查询语言（如SQL或关系代数）中，你只需指定所需数据的模式 - 结果必须符合哪些条件，以及如何将数据转换（例如，排序，分组和集合）， 但不需指定如何实现这一目标。数据库系统的查询优化器决定使用哪些索引和哪些连接方法，以及以何种顺序执行查询的各个部分。</p>
+<p><strong>命令式查询语句</strong>：许多常用的编程语言是命令式的，命令式语言告诉计算机以特定顺序执行某些操作。</p>
+<p><strong>声明式语言</strong>往往适合<strong>并行执行</strong>。现在，CPU的速度通过内核的增加变得更快，而不是以比以前更高的时钟速度运行。命令代码很难在多个内核和多个机器之间并行化，因为它指定了指令必须以特定顺序执行。声明式语言更具有并行执行的潜力，因为它们仅指定结果的模式，而不指定用于确定结果的算法。在适当情况下，数据库可以自由使用查询语言的并行实现。</p>
+<p><strong>MapReduce查询</strong></p>
+<p><strong>图数据模型</strong></p>
+<p>cypher查询语句</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="">数据密集型应用设计学习笔记</a></p>
+        <p><span>文章作者:</span><a href="/" title="回到主页">Leer0</a></p>
+        <p><span>发布时间:</span>2019-10-24, 18:26:30</p>
+        <p><span>最后更新:</span>2019-10-24, 21:43:18</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="" title="数据密集型应用设计学习笔记">http://yoursite.com/2019/10/24/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://yoursite.com/2019/10/24/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/　　作者: Leer0" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license noopener" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="CC BY-NC-SA 4.0 International" target = "_blank">"署名-非商用-相同方式共享 4.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+    <nav id="article-nav">
+        
+            <div id="article-nav-newer" class="article-nav-title">
+                <a href="../../../11/01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/">
+                    设计模式之工厂模式
+                </a>
+            </div>
+        
+        
+            <div id="article-nav-older" class="article-nav-title">
+                <a href="../hexo-github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">
+                    hexo+github搭建个人博客
+                </a>
+            </div>
+        
+    </nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+        <strong class="toc-title">文章目录</strong>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#数据密集型应用学习笔记"><span class="toc-number">1.</span> <span class="toc-text">数据密集型应用学习笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1、可靠性、可扩展性、可维护性"><span class="toc-number">1.1.</span> <span class="toc-text">1、可靠性、可扩展性、可维护性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2、数据模型与查询语言"><span class="toc-number">1.2.</span> <span class="toc-text">2、数据模型与查询语言</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#关系模型与文档模型"><span class="toc-number">1.2.1.</span> <span class="toc-text">关系模型与文档模型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#NoSql"><span class="toc-number">1.2.2.</span> <span class="toc-text">NoSql</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#采用NoSql数据库的背后几个驱动因素："><span class="toc-number">1.2.3.</span> <span class="toc-text">采用NoSql数据库的背后几个驱动因素：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#对象关系不匹配"><span class="toc-number">1.2.4.</span> <span class="toc-text">对象关系不匹配</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#网络模型（CODASYL模型）"><span class="toc-number">1.2.5.</span> <span class="toc-text">网络模型（CODASYL模型）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#文档模型与关系模型对比"><span class="toc-number">1.2.6.</span> <span class="toc-text">文档模型与关系模型对比</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#文档中的架构灵活性"><span class="toc-number">1.2.7.</span> <span class="toc-text">文档中的架构灵活性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#查询数据的局部性"><span class="toc-number">1.2.8.</span> <span class="toc-text">查询数据的局部性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#文档和关系数据库的融合"><span class="toc-number">1.2.9.</span> <span class="toc-text">文档和关系数据库的融合</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#数据查询语句"><span class="toc-number">1.2.10.</span> <span class="toc-text">数据查询语句</span></a></li></ol></li></ol></li></ol>
+        
+    </div>
+    <style>
+        .left-col .switch-btn,
+        .left-col .switch-area {
+            display: none;
+        }
+        .toc-level-6 i,
+        .toc-level-6 ol {
+            display: none !important;
+        }
+    </style>
+
+    <input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+    <script>
+        yiliaConfig.toc = ["隐藏目录", "显示目录", !!"false"];
+    </script>
+
+
+
+    
+<div class="share">
+    
+        <div class="bdsharebuttonbox">
+            <a href="#" class="fa fa-twitter bds_twi" data-cmd="twi" title="分享到推特"></a>
+            <a href="#" class="fa fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+            <a href="#" class="fa fa-qq bds_sqq" data-cmd="sqq" title="分享给 QQ 好友"></a>
+            <a href="#" class="fa fa-files-o bds_copy" data-cmd="copy" title="复制网址"></a>
+            <a href="#" class="fa fa fa-envelope-o bds_mail" data-cmd="mail" title="通过邮件分享"></a>
+            <a href="#" class="fa fa-weixin bds_weixin" data-cmd="weixin" title="生成文章二维码"></a>
+            <a href="#" class="fa fa-share-alt bds_more" data-cmd="more"></i></a>
+        </div>
+        <script>
+            window._bd_share_config={
+                "common":{"bdSnsKey":{},"bdText":"数据密集型应用设计学习笔记　| Leer0's Blog　","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+        </script>
+    
+
+    
+</div>
+
+
+
+
+
+
+
+    
+
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="../../../11/01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/" title="上一篇: 设计模式之工厂模式">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+
+        
+            <a href="../hexo-github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/" title="下一篇: hexo+github搭建个人博客">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="../../../11/20/%E6%95%B0%E6%8D%AE%E5%BA%93%E9%94%81/">数据库锁</a></li><li class="post-list-item"><a class="post-list-link" href="../../../11/20/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/">数据库事务</a></li><li class="post-list-item"><a class="post-list-link" href="../../../11/17/ubuntu%E5%AE%89%E8%A3%85JDK/">ubuntu安装JDK</a></li><li class="post-list-item"><a class="post-list-link" href="../../../11/14/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2/">数据密集型应用设计——数据库的存储与检索</a></li><li class="post-list-item"><a class="post-list-link" href="../../../11/13/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6/">数据密集型应用设计——分布式数据复制</a></li><li class="post-list-item"><a class="post-list-link" href="../../../11/13/ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1-Partrtrt-One/">ZooKeeper——分布式协调服务-Partrtrt_One</a></li><li class="post-list-item"><a class="post-list-link" href="../../../11/10/%E6%B7%B1%E5%85%A5JVM%E5%86%85%E6%A0%B8/">深入JVM内核</a></li><li class="post-list-item"><a class="post-list-link" href="../../../11/06/CSharp-script-for-Unity-first-part/">CSharp-script-for-Unity-first-part</a></li><li class="post-list-item"><a class="post-list-link" href="../../../11/01/UML%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%BB%BA%E6%A8%A1/">UML面向对象建模</a></li><li class="post-list-item"><a class="post-list-link" href="../../../11/01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/">设计模式之工厂模式</a></li><li class="post-list-item"><a class="post-list-link" href="">数据密集型应用设计学习笔记</a></li><li class="post-list-item"><a class="post-list-link" href="../hexo-github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/">hexo+github搭建个人博客</a></li><li class="post-list-item"><a class="post-list-link" href="../java%E9%9B%86%E5%90%88%E7%B1%BB/">java集合类</a></li></ul>
+
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                <i class="fa fa-copyright"></i> 
+                2016-2019 Leer0
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank" title="快速、简洁且高效的博客框架">Hexo</a>  Theme <a href="https://github.com/MOxFIVE/hexo-theme-yelee" target="_blank" title="简而不减 Hexo 双栏博客主题  v3.5">Yelee</a> by MOxFIVE <i class="fa fa-heart animated infinite pulse"></i>
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" title="本站到访数"><i class="fa fa-user" aria-hidden="true"></i><span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>| </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit"  title="本页阅读量"><i class="fa fa-eye animated infinite pulse" aria-hidden="true"></i><span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+    </div>
+    
+<script data-main="/js/main.js" src="//cdn.bootcss.com/require.js/2.2.0/require.min.js"></script>
+
+
+
+
+
+<div class="scroll" id="scroll">
+    <a href="#" title="返回顶部"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments" onclick="load$hide();" title="查看评论"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer" title="转到底部"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    // Open in New Window
+    
+        var oOpenInNew = {
+            
+            
+            
+            
+            
+            
+             archives: ".archive-article-title", 
+             miniArchives: "a.post-list-link", 
+            
+             friends: "#js-friends a", 
+             socail: ".social a" 
+        }
+        for (var x in oOpenInNew) {
+            $(oOpenInNew[x]).attr("target", "_blank");
+        }
+    
+</script>
+
+    <script>
+        var originTitle = document.title;
+        var titleTime;
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                document.title = "(つェ⊂) 我藏好了哦~ " + originTitle;
+                clearTimeout(titleTime);
+            }
+            else {
+                document.title = "(*´∇｀*) 被你发现啦~ " + originTitle;
+                titleTime = setTimeout(function() {
+                    document.title = originTitle;
+                }, 2000);
+            }
+        })
+    </script>
+
+<script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+</script>
+  </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
