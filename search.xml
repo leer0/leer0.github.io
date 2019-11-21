@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+  
+    
+    <entry>
+      <title>数据库锁</title>
+      <link href="/2019/11/20/%E6%95%B0%E6%8D%AE%E5%BA%93%E9%94%81/"/>
+      <url>/2019/11/20/%E6%95%B0%E6%8D%AE%E5%BA%93%E9%94%81/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>数据库锁总结下来有如下几种：悲观锁、乐观锁、表锁、行锁（临间锁、间隙锁、记录锁）、共享锁、排他锁、意向共享锁、意向排他锁等。</p><h3 id="悲观锁与乐观锁"><a href="#悲观锁与乐观锁" class="headerlink" title="悲观锁与乐观锁"></a>悲观锁与乐观锁</h3><h4 id="什么是悲观锁？"><a href="#什么是悲观锁？" class="headerlink" title="什么是悲观锁？"></a>什么是悲观锁？</h4><p>悲观锁是基于一种悲观的态度类来防止一切数据冲突，它是以一种预防的姿态在修改数据之前把数据锁住，然后再对数据进行读写，在它释放锁之前任何人都不能对其数据进行操作，直到前面一个人把锁释放后下一个人才可对数据进行加锁，然后对数据进行操作，一般数据库本身锁的机制都是基于悲观锁的机制实现的;</p><p><strong>特点</strong>：可以完全保证数据的独占性和正确性，因为每次请求都会先对数据进行加锁， 然后进行数据操作，最后再解锁，而加锁释放锁的过程会造成消耗，所以性能不高;</p><h4 id="什么是乐观锁？"><a href="#什么是乐观锁？" class="headerlink" title="什么是乐观锁？"></a>什么是乐观锁？</h4><p>乐观锁是对于数据冲突保持一种乐观态度，操作数据时不会对操作的数据进行加锁（这使得多个任务可以并行的对数据进行操作），只有到数据提交的时候才通过一种机制来验证数据是否存在冲突(一般实现方式是通过加版本号然后进行版本号的对比方式实现);</p><p>它假设多用户并发的事务在处理时不会彼此互相影响，各事务能够在不产生锁的情况下处理各自影响的那部分数据。在提交数据更新之前，每个事务会先检查在该事务读取数据后，有没有其他事务又修改了该数据。如果其他事务有更新的话，正在提交的事务会进行回滚。</p><p>实现方式：</p><ul><li>使用数据版本（Version）记录机制实现，何谓数据版本？即为数据增加一个版本标识，一般是通过为数据库表增加一个数字类型的 “version” 字段来实现。当读取数据时，将version字段的值一同读出，数据每更新一次，对此version值加一。当我们提交更新的时候，判断数据库表对应记录的当前版本信息与第一次取出来的version值进行比对，如果数据库表当前版本号与第一次取出来的version值相等，则予以更新，否则认为是过期数据。</li><li>使用时间戳（timestamp），在需要乐观锁控制的table中增加一个字段，名称无所谓，字段类型使用时间戳（timestamp）, 和上面的version类似，也是在更新提交的时候检查当前数据库中数据的时间戳和自己更新前取到的时间戳进行对比，如果一致则OK，否则就是版本冲突。</li></ul><p><strong>特点</strong>：乐观锁是一种并发类型的锁，其本身不对数据进行加锁通而是通过业务实现锁的功能，不对数据进行加锁就意味着允许多个请求同时访问数据，同时也省掉了对数据加锁和解锁的过程，这种方式大大的提高了数据操作的性能;乐观锁适用于<strong>读多写少</strong>的应用场景，这样可以提高吞吐量。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 数据库 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> database </tag>
+            
+            <tag> 数据库锁 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>数据库事务</title>
+      <link href="/2019/11/20/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/"/>
+      <url>/2019/11/20/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>事务（transaction）是由一系列对系统中数据进行访问与更新的操作所组成的一个程序执行逻辑单元。当多个应用程序并发访问数据库时，事务为这些应用程序之间提供一个隔离方法，以防止彼此的操作相互干扰。事务为数据库操作序列提供了一个从失败恢复到正常状态的方法，同时也提供了数据库即使在异常状态下也能保持数据一致性的方法。</p><h3 id="ACID"><a href="#ACID" class="headerlink" title="ACID"></a>ACID</h3><p>事务具有四大特性：原子性（Atomicity）、一致性（Consistency）、隔离性（Isolation）、持久性（Durability）</p><h4 id="原子性（Atomicity）"><a href="#原子性（Atomicity）" class="headerlink" title="原子性（Atomicity）"></a>原子性（Atomicity）</h4><p>事务原子性是指事务必须是一个原子的<strong>操作序列</strong>单元。事务在一次执行过程中，只允许出现两种状态：</p><ul><li>全部执行成功</li><li>全部不执行</li></ul><p>任何一项操作失败，都将导致整个事务失败，同时其他已经执行的操作都将被撤销或回滚。</p><h4 id="一致性（Consistency）"><a href="#一致性（Consistency）" class="headerlink" title="一致性（Consistency）"></a>一致性（Consistency）</h4><p>事务的一致性是指事务不能破坏数据库数据的完整性和一致性，一个事务在执行前后数据库都处于<strong>一致性状态</strong>。当数据库只包含成功事务提交的结果时，就说数据库处于一致性状态。当数据库在运行过程中发生故障，有些事务尚未完成，而这些未完成的事务对数据库的修改已经有一部分写入数据库，此时数据库就处于<strong>不一致状态</strong>。</p><h4 id="隔离性（Isolation）"><a href="#隔离性（Isolation）" class="headerlink" title="隔离性（Isolation）"></a>隔离性（Isolation）</h4><p>事务的隔离性是指并发环境中，并发的事务是相互隔离的。不同的事务并发操纵相同的数据时，每个事物都有自己完全独立的数据空间，即一个事务内部的操作及使用的数据都其他事务是隔离的。并发执行的各个事务之间不能相互干扰。</p><p>在标准的SQL规范中，定义了4个事务隔离级别：</p><h5 id="未授权读取（Read-Uncommitted）"><a href="#未授权读取（Read-Uncommitted）" class="headerlink" title="未授权读取（Read Uncommitted）"></a>未授权读取（Read Uncommitted）</h5><h5 id="授权读取（Read-Committed）"><a href="#授权读取（Read-Committed）" class="headerlink" title="授权读取（Read Committed）"></a>授权读取（Read Committed）</h5><h5 id="可重复读取（Repeatable-Read）"><a href="#可重复读取（Repeatable-Read）" class="headerlink" title="可重复读取（Repeatable Read）"></a>可重复读取（Repeatable Read）</h5><h5 id="串行化（Serializable）"><a href="#串行化（Serializable）" class="headerlink" title="串行化（Serializable）"></a>串行化（Serializable）</h5><p><strong>脏读</strong>：</p><p><strong>可重复读</strong>：</p><p><strong>幻读</strong>：</p><h4 id="持久性（Durability）"><a href="#持久性（Durability）" class="headerlink" title="持久性（Durability）"></a>持久性（Durability）</h4>]]></content>
+      
+      
+      <categories>
+          
+          <category> 数据库 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> database </tag>
+            
+            <tag> transaction </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>ubuntu安装JDK</title>
+      <link href="/2019/11/17/ubuntu%E5%AE%89%E8%A3%85JDK/"/>
+      <url>/2019/11/17/ubuntu%E5%AE%89%E8%A3%85JDK/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h3 id="手动下载压缩包安装Oracle-Java-JDK"><a href="#手动下载压缩包安装Oracle-Java-JDK" class="headerlink" title="手动下载压缩包安装Oracle Java JDK"></a>手动下载压缩包安装Oracle Java JDK</h3><p>1、前往Oracle Java<a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html" target="_blank" rel="noopener">官方网站</a>下载Oracle JDK压缩包</p><p>2、解压缩至指定路径：</p><ul><li><p>创建安装目录</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir /usr/lib/jvm</span><br></pre></td></tr></table></figure></li></ul><ul><li><p>解压缩至该目录</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo tar -zxvf jdk-8u221-linux-x64.tar.gz</span><br></pre></td></tr></table></figure></li></ul><p>3、修改环境变量</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vi ~/.bashrc</span><br></pre></td></tr></table></figure><p>在打开的文件末尾加上以下内容</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"><span class="built_in">set</span> oracle jdk environment</span></span><br><span class="line">export JAVA_HOME=/usr/lib/jvm/jdk1.8.0_221</span><br><span class="line">export JRE_HOME=$&#123;JAVA_HOME&#125;/jre</span><br><span class="line">export CLASSPATH=.:$&#123;JAVA_HOME&#125;/lib:$&#123;JRE_HOME&#125;/lib</span><br><span class="line">export PATH=$&#123;JAVA_HOME&#125;/bin:$PATH</span><br></pre></td></tr></table></figure><p>输入以下命令，使环境变量立即生效</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source ~/.bashrc</span><br></pre></td></tr></table></figure><p>4、设置系统默认JDK版本</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk1.8.0_221/bin/java 300</span><br><span class="line">sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk1.8.0_221/bin/javac 300</span><br><span class="line">sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/jdk1.8.0_221/bin/jar 300</span><br><span class="line">sudo update-alternatives --install /usr/bin/javah javah /usr/lib/jvm/jdk1.8.0_221/bin/javah 300</span><br><span class="line">sudo update-alternatives --install /usr/bin/javap javap /usr/lib/jvm/jdk1.8.0_221/bin/javap 300</span><br></pre></td></tr></table></figure><p>然后执行</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo update-alternatives --config java</span><br></pre></td></tr></table></figure><p>5、查看JDK版本，检查是否安装成功</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -version</span><br></pre></td></tr></table></figure><p>如果安装了多个版本的JDK，可以通过以下命令在版本之间进行切换</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo update-alternatives -config java</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> ubuntu </tag>
+            
+            <tag> jdk </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>数据密集型应用设计——数据库的存储与检索</title>
+      <link href="/2019/11/14/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2/"/>
+      <url>/2019/11/14/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>日志结构（log-structured）的存储引擎</p><p>面向页面（page-oriented）的存储引擎</p><h3 id="日志（log）"><a href="#日志（log）" class="headerlink" title="日志（log）"></a>日志（log）</h3><h4 id="日志型数据存储"><a href="#日志型数据存储" class="headerlink" title="日志型数据存储"></a>日志型数据存储</h4><p>何谓日志型？就是append only，所有写操作只追加而不修改老的数据，就像我们的各种服务器日志一样。在Bitcask模型中，数据文件以日志型只增不减的写入文件，而文件有一定的大小限制，当文件大小增加到相应的限制时，就会产生一个新的文件，老的文件将只读不写。</p><p>许多数据库在内部使用了<strong>日志（log）</strong>，也就是一个仅<strong>追加（append-only）</strong>的数据文件。真正的数据库有更多的问题需要处理（如并发控制，回收磁盘空间以避免日志无限增长，处理错误与部分写入的记录），但基本原理是一样的。</p><h3 id="索引（index）"><a href="#索引（index）" class="headerlink" title="索引（index）"></a>索引（index）</h3><p>索引背后的大致思想是，保存一些额外的元数据作为路标，帮助你找到想要的数据。</p><p>索引是从主数据衍生的附加（additional）结构。许多数据库允许添加与删除索引，这不会影响数据的内容，它只影响查询的性能。维护额外的结构会产生开销，特别是在写入时。任何类型的索引通常都会减慢写入速度，因为每次写入数据时都需要更新索引。</p><p><strong>存储系统中一个重要的权衡</strong>：精心选择的索引加快了读查询的速度，但是每个索引都会拖慢写入速度。因为这个原因，数据库默认并不会索引所有的内容，而需要你（程序员或DBA）通过对应用查询模式的了解来手动选择索引。你可以选择能为应用带来最大收益，同时又不会引入超出必要开销的索引。</p><h3 id="哈希索引"><a href="#哈希索引" class="headerlink" title="哈希索引"></a>哈希索引</h3><p>键值数据虽然不是可以索引的唯一数据类型，但是却是最常见的。键值存储与大多数编程语言中的字典类型非常相似，而字典通常使用散列映射（hash map/哈希表（hash table））实现的。</p><p>假设我们的数据存储是一个追加写入的文件，那么最简单的索引策略就是：保留一个内存中的哈希映射，其中每一个键都映射到一个数据文件中的字节偏移量，指明了可以找到对应值的位置。</p><p>哈希索引的<strong>局限性</strong>：</p><ul><li>散列表大小不能太大，因为他必须能够放进内存，因为如果散列表如果存储在磁盘中，会对性能有很大影响，因为哈希索引需要大量的随机访问I/O。</li><li>范围查询效率不高。例如，您无法轻松扫描kitty00000和kitty99999之间的所有键——您必须在散列映射中单独查找每个键。</li></ul><h3 id="Bitcask"><a href="#Bitcask" class="headerlink" title="Bitcask"></a>Bitcask</h3><p>Bitcask 是一个日志型、基于hash表结构的key-value存储模型，以Bitcask为存储模型的K-V系统有 <strong>Riak</strong> 和 <strong>beansdb</strong> 新版本。</p><p>在Bitcask模型中，数据文件以日志型只追加写入文件，而文件有一定的大小限制，当文件大小增加到相应的限制时，就会关闭当前的段文件，并开始写入一个新的段文件。然后我们就可以对那些停止写入的段进行压缩，即意味着在日志文件中丢弃重复的键，只保留每个键的最新更新。由于压缩经常会使得段变得很小（假设在一个段内键被平均重写了好几次），我们也可以在执行压缩的同时将多个段合并在一起，如下图所示。段被写入后永远不会被修改，所以合并的段被写入一个新的文件。冻结段的合并和压缩可以在后台线程中完成，在进行时，我们仍然可以继续使用旧的段文件来正常提供读写请求。合并过程完成后，我们将读取请求转换为使用新的合并段而不是旧段 —— 然后可以简单地删除旧的段文件。</p><p><img src="/2019/11/14/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2/D:%5CHexo%5Cblog%5Csource_posts%5C%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%98%E5%82%A8%E4%B8%8E%E6%A3%80%E7%B4%A2%5C%E5%90%8C%E6%97%B6%E6%89%A7%E8%A1%8C%E5%8E%8B%E7%BC%A9%E4%B8%8E%E5%90%88%E5%B9%B6.PNG" alt></p><p>每个段都有自己的内存散列表，将键映射到文件偏移量。未找到一个键的值，搜先查找最新段的哈希映射，如果键不存在，就去查找第二新的段，以此类推。合并处理会使的段的数量保持一个较小值，因此查找是不需要太多的哈希映射。</p><p>具体<strong>实践</strong>中的核心关注点：</p><ul><li>文件格式：CSV不是日志的最佳格式。使用二进制格式会更快，更简单。</li><li>删除记录：如果要删除一个键及其关联的值，则需在数据文件附加一个特殊的删除记录（<strong>逻辑删除</strong>）。当日志被合并时高数合并过程放弃删除键的任何以前的值。</li><li>崩溃恢复：如果数据库重启，内存中的哈希散列将丢失。原则上，我们可以通过从头到尾读取所有段文件并依次记录每个键的最新值的偏移量来重塑每段的哈希散列。然而，如果段文件的数量非常大，将会花费很长时间，从而使得服务重启的代价加剧。Bitcask通过在磁盘中存储每一个段的哈希散列的<strong>快照</strong>来加快恢崩溃复，</li><li>部分写入记录：数据库可能随时崩溃，包括将记录附加到日志中途。 Bitcask文件包含校验和，允许检测和忽略日志的这些损坏部分。</li><li>并发控制：由于写操作是以严格顺序的顺序附加到日志中的，所以常见的实现选择是只有一个写入器线程。数据文件段是附加的，否则是不可变的，所以它们可以被多个线程同时读取。</li></ul><p><strong>追加</strong>（append-only）设计的原因：</p><ol><li>追加和分段合并是顺序写入操作，通常比随机写入快很多，尤其是在机械硬盘上。</li><li>如果段文件是附加或者不可变的，并发和崩溃恢复就简单得多。</li><li>合并旧段可以避免数据文件随着时间的推移而分散问题。</li></ol><h3 id="SSTables（Sorted-String-table）和LSM树"><a href="#SSTables（Sorted-String-table）和LSM树" class="headerlink" title="SSTables（Sorted String table）和LSM树"></a>SSTables（Sorted String table）和LSM树</h3><p>现在对之前提到的段文件里的键值对序列按键排序，这个格式就称为排序字符串表（Sorted String Table）,简称SSTable。还要求每个键在每个合并的段文件中出现一次（压缩过程中保证）</p><p>与散列索引的日志段相比，SSTable有几大<strong>优势</strong>：</p><p>1、合并段是简单高效的，即使文件大于可用内存。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Big Data </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> DataBase </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>数据密集型应用设计——分布式数据复制</title>
+      <link href="/2019/11/13/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6/"/>
+      <url>/2019/11/13/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>希望数据复制的原因：</p><ul><li>使得数据与用户在地理上接近（从而减少延迟）</li><li>即使系统的一部分出现故障，系统也能继续工作（从而提高可用性）</li><li>扩展可以接受读请求的机器数量（从而提高读取吞吐量）</li></ul><p>复制的<strong>困难之处</strong>在于<strong>处理复制数据的变更</strong>（change）</p><p>流行的<strong>变更</strong>数据复制算法：单领导者（single leader），多领导者（multi leader）和无领导者（leaderless）</p><p>如何确保所有数据都落在了所有的副本上？</p><p>解决方案：为基于领导者的复制（leader-based replication）（也称主动/被动<br>（active/passive） 或 主/从（master/slave）复制）</p><p><img src="/2019/11/13/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6/D:%5CHexo%5Cblog%5Csource_posts%5C%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6%5C%E5%9F%BA%E4%BA%8E%E9%A2%86%E5%AF%BC%E8%80%85(%E4%B8%BB-%E4%BB%8E)%E7%9A%84%E5%A4%8D%E5%88%B6.PNG" alt></p><p>它的工作原理如下：</p><ol><li><p>副本之一被指定为领导者（leader），也称为 主库（master） ，首要（primary）。当客户端要向数据库写入时，它必须将请求发送给领导者，领导者会将新数据写入其本地存储。</p></li><li><p>其他副本被称为追随者（followers），亦称为只读副本（read replicas），从库（slaves），次要（ sencondaries），<strong>热备</strong>（hot-standby） 。每当领导者将新数据写入本地存储时，它也会将数据变更发送给所有的追随者，称之为复制日志（replicationlog）记录或变更流（change stream）。每个跟随者从领导者拉取日志，并相应更新其本地数据库副本，方法是按照领导者处理的相同顺序应用所有写入。</p></li><li><p>当客户想要从数据库中读取数据时，它可以向领导者或追随者查询。 但只有领导者才能接受写操作（从客户端的角度来看从库都是只读的）。</p><p><code>不同的人对热（hot），温（warn），冷（cold） 备份服务器有不同的定义。 例如在PostgreSQL中，热备（hot standby）指的是能接受客户端读请求的副本。而温备（warm standby）只是追随领导者，但不处理客户端的任何查询。 就本书而言，这些差异并不重要。</code> </p></li></ol><h3 id="同步复制与异步复制"><a href="#同步复制与异步复制" class="headerlink" title="同步复制与异步复制"></a>同步复制与异步复制</h3><p><img src="/2019/11/13/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6/D:%5CHexo%5Cblog%5Csource_posts%5C%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%8D%E5%88%B6%5C%E5%9F%BA%E4%BA%8E%E9%A2%86%E5%AF%BC%E8%80%85%E7%9A%84%E5%A4%8D%E5%88%B6%EF%BC%9A%E4%B8%80%E4%B8%AA%E5%90%8C%E6%AD%A5%E4%BB%8E%E5%BA%93%E5%92%8C%E4%B8%80%E4%B8%AA%E5%BC%82%E6%AD%A5%E4%BB%8E%E5%BA%93.PNG" alt></p><p>同步复制<strong>优缺点</strong></p><p><strong>优点</strong>：从库保证了与主库一直的最新数据副本。如果主库突然失效，仍可以从同步从库中找到数据。</p><p><strong>缺点</strong>：如果从库没有响应（比如它已崩溃，或者出现网络故障或其他原因），主库就无法处理写入操作。主库必须组织所有的写入，等到同步副本再次可用为止。</p><p>如果在数据库上启用同步复制，通常意味着其中一个跟随者是同步的，而其他的则是异步的。如果同步从库变得不可用或缓慢，则使一个异步从库变为同步从库。这保证你至少在两个节点上拥有最新的数据副本：主库和同步从库。 这种配置有时也被称为<strong>半同步</strong>（semi-synchronous）</p><p>通常情况下，基于领导者的复制都配置为完全异步。 在这种情况下，如果主库失效且不可恢复，则任何尚未复制给从库的写入都会丢失。 这意味着即使已经向客户端确认成功，写入也不能保证持久（Durable）。 然而，一个完全异步的配置也有优点：即使所有的从库都落后了，主库也可以继续处理写入。</p><p>对于异步复制系统而言，主库故障时有可能丢失数据。这可能是一个严重的问题，因此研究人员仍在研究不丢数据但仍能提供良好性能和可用性的复制方法。 例如，链式复制是同步复制的一种变体，已经在一些系统（如Microsoft Azure存储）中成功实现。</p><h3 id="设置新从库"><a href="#设置新从库" class="headerlink" title="设置新从库"></a>设置新从库</h3><h3 id="处理节点宕机"><a href="#处理节点宕机" class="headerlink" title="处理节点宕机"></a>处理节点宕机</h3><h4 id="从库失效：追赶恢复"><a href="#从库失效：追赶恢复" class="headerlink" title="从库失效：追赶恢复"></a>从库失效：追赶恢复</h4><p>在其本地磁盘上，每个从库记录从主库收到的数据变更。如果从库崩溃并重新启动，或者，如果主库和从库之间的网络暂时中断，则比较容易恢复：从库可以从日志中知道，在发生故障之前处理的最后一个事务。因此，从库可以连接到主库，并请求在从库断开连接时发生的所有数据变更。当应用完所有这些变化后，它就赶上了主库，并可以像以前一样继续接收数据变更流。</p><h4 id="主库失效：故障切换"><a href="#主库失效：故障切换" class="headerlink" title="主库失效：故障切换"></a>主库失效：故障切换</h4><p>故障切换：将其中一个从库提升为新的主库，从新配置客户端，已将他们的写操作发送给新的主库，其他从库需要开始拉取新主库的数据变更。</p><p>自动故障切换过程：</p><p>1、确认主库失效：大多数系统只是简单使用超时（Timeout）：节点频繁<br>地相互来回传递消息，并且如果一个节点在一段时间内（例如30秒）没有响应，就认为它挂了（因为计划内维护而故意关闭主库不算）。</p><p>2、选择一个新的主库：这可以通过<strong>选举</strong>过程（主库由剩余副本以多数选举产生）来完成，或者可以由之前选定的控制器节点（controller node）来指定新的主库。主库的最佳人选通常是拥有旧主库最新数据副本的从库（最小化数据损失）。让所有的节点同意一个新的领导者，是一个<strong>共识问题</strong>。</p><p>3、从新配置系统以启用新的主库：客户端需要将他们的写请求发送给新的主库。如果老的主库恢复了，需要认可新的主库，成为一个从库。</p><p>故障切换会出现的问题：</p><ul><li>如果使用异步复制，则新主库可能没有收到老主库宕机前最后的写入操作。在选出新主库后，如果老主库重新加入集群，新主库在此期间可能会收到冲突的写入，那这些写入该如何处理？最常见的解决方案是简单丢弃老主库未复制的写入，这很可能打破客户对于数据持久性的期望。</li><li>如果数据库需要和其他外部存储相协调，那么丢弃写入内容是极其危险的操作。例如在GitHub的一场事故中，一个过时的MySQL从库被提升为主库。数据库使用自增ID作为主键，因为新主库的计数器落后于老主库的计数器，所以新主库重新分配了一些已经被老主库分配掉的ID作为主键。这些主键也在Redis中使用，主键重用使得MySQL和Redis中数据产生不一致，最后导致一些私有数据泄漏到错误的用户手中。</li><li>发生某些故障时可能会出现两个节点都以为自己是主库的情况。这种情况称为脑裂(split brain)，非常危险：如果两个主库都可以接受写操作，却没有冲突解决机制（参见“多领导者复制”），那么数据就可能丢失或损坏。一些系统采取了安全防范措施：当检测到两个主库节点同时存在时会关闭其中一个节点 ，但设计粗糙的机制可能最后会导致两个节点都被关闭。</li><li>主库被宣告死亡之前的正确超时应该怎么配置？在主库失效的情况下，超时时间越长，意味着恢复时间也越长。但是如果超时设置太短，又可能会出现不必要的故障切换。例如，临时负载峰值可能导致节点的响应时间超时，或网络故障可能导致数据包延迟。如果系统已经处于高负载或网络问题的困扰之中，那么不必要的故障切换可能会让情况变得更糟糕。</li></ul><p>这些问题没有简单的解决方案。因此，即使软件支持自动故障切换，不少运维团队还是更愿意手动执行故障切换。</p><h3 id="复制日志的实现"><a href="#复制日志的实现" class="headerlink" title="复制日志的实现"></a>复制日志的实现</h3><h4 id="基于语句的复制"><a href="#基于语句的复制" class="headerlink" title="基于语句的复制"></a>基于语句的复制</h4><p>主库记录下它执行的每一个写入请求，并将该语句日志发送给其他从库。对于关系数据库来说，这意味着每个 INSERT ， UPDATE 或 DELETE 语句都被转发给每个从库，每个从库解析并执行该SQL语句，就像从客户端收到一样。</p><p>该复制方式的问题：</p><ul><li>任何调用<strong>非确定性函数</strong>（nondeterministic）的语句，可能会在每个副本上生成不同的值。例如，使用 NOW() 获取当前日期时间，或使用 RAND() 获取一个随机数。</li><li>如果语句使用了<strong>自增列</strong>（auto increment），或者依赖于数据库中的<strong>现有数据</strong>（例如， <code>UPDATE ... WHERE &lt;某些条件&gt;</code> ），则必须在每个副本上按照完全相同的顺序执行它们，否则可能会产生不同的效果。当有多个并发执行的事务时，这可能成为一个限制。</li><li>有<strong>副作用</strong>的语句（例如，触发器，存储过程，用户定义的函数）可能会在每个副本上产生不同的副作用，除非副作用是绝对确定的。</li></ul><h4 id="传输预写式日志（WAL"><a href="#传输预写式日志（WAL" class="headerlink" title="传输预写式日志（WAL)"></a>传输预写式日志（WAL)</h4><h4 id="逻辑日志复制（基于行）"><a href="#逻辑日志复制（基于行）" class="headerlink" title="逻辑日志复制（基于行）"></a>逻辑日志复制（基于行）</h4><h4 id="基于触发器的复制"><a href="#基于触发器的复制" class="headerlink" title="基于触发器的复制"></a>基于触发器的复制</h4><h3 id="复制延迟问题"><a href="#复制延迟问题" class="headerlink" title="复制延迟问题"></a>复制延迟问题</h3><p>解决方法：</p><ul><li>读己之写：当读取自己所写的相关数据时，只从主数据库读取，当读取其他用户相关信息时，则从从库读。</li><li>单调读：从异步从库读取第二个异常例子是，用户可能会遇到时光倒流（moving backward in time）。用户首先从新副本读取，然后从旧副本读取，即为时光倒流。实现单调读取的一种方式是确保每个用户<strong>总是从同一个副本进行读取</strong>（不同的用户可以从不同的副本读取）</li><li>一致前缀读：该方法是为了解决因果颠倒的问题。解决方案是，确保任何因果相关的写入都写入相同的分区</li></ul><h3 id="多主复制"><a href="#多主复制" class="headerlink" title="多主复制"></a>多主复制</h3>]]></content>
+      
+      
+      <categories>
+          
+          <category> Big Data </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 分布式 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>ZooKeeper——分布式协调服务（一）</title>
+      <link href="/2019/11/13/ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1%EF%BC%88%E4%B8%80%EF%BC%89/"/>
+      <url>/2019/11/13/ZooKeeper%E2%80%94%E2%80%94%E5%88%86%E5%B8%83%E5%BC%8F%E5%8D%8F%E8%B0%83%E6%9C%8D%E5%8A%A1%EF%BC%88%E4%B8%80%EF%BC%89/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h3 id="什么是ZooKeeper？"><a href="#什么是ZooKeeper？" class="headerlink" title="什么是ZooKeeper？"></a>什么是ZooKeeper？</h3><p>ZooKeeper是一个开源且高可用的<strong>分布式数据管理与系统协调</strong>框架，由yahoo创建，是Google <strong>Chubby的开源实现</strong>。它基于Paxos算法实现了分布式环境中数据的强一致性。</p><p>值得注意的是，ZooKeeper并非天生就是为了这些应用场景设计的，都是后来众多开发者根据其框架的特性，利用其提供的一系列API接口（或者称为原语集），摸索出来的典型使用方法。</p><p>ZooKeeper是用于维护配置信息，命名，提供分布式同步和提供组服务的集中式服务。所有这些类型的服务都以某种形式或由分布式应用程序使用。每次实施它们时，都会进行很多工作来修复不可避免的错误和竞争条件。由于难以实现这类服务，因此应用程序最初通常会跳过它们，这会使它们在存在更改的情况下变得脆弱并且难以管理。即使部署正确，这些服务的不同实现也会导致管理复杂。</p><p>ZooKeeper旨在将这些不同服务的本质提炼成一个非常简单的界面，以实现集中式协调服务。服务本身是分布式的，并且高度可靠。服务将实现共识，组管理和状态协议，因此应用程序不需要自己实现它们。这些应用程序的特定用途将包括Zoo Keeper的特定组件和特定于应用程序的约定的混合。ZooKeeper食谱展示了如何使用此简单服务来构建功能更强大的抽象。</p><h4 id="Paxos算法"><a href="#Paxos算法" class="headerlink" title="Paxos算法"></a>Paxos算法</h4><h4 id="数据一致性"><a href="#数据一致性" class="headerlink" title="数据一致性"></a>数据一致性</h4><p>weak<strong>弱一致性</strong>：当在某一数据库写入数据，在该数据库的数据副本中进行读操作可能读出该数据，也可能读不出该数据。如：</p><p>Eventually<strong>最终一致性</strong>：当写入一条新数据时，</p><p>Strong<strong>强一致性</strong>：：</p><h3 id="ZooKeeper典型应用场景"><a href="#ZooKeeper典型应用场景" class="headerlink" title="ZooKeeper典型应用场景"></a>ZooKeeper典型应用场景</h3><h4 id="数据发布与订阅-配置中心"><a href="#数据发布与订阅-配置中心" class="headerlink" title="数据发布与订阅(配置中心)"></a>数据发布与订阅(配置中心)</h4><p>发布与订阅模型，即所谓的配置中心，顾名思义就是发布者将数据发布到ZK节点上，供订阅者动态获取数据，实现配置信息的集中式管理和动态更新。例如全局的配置信息，服务式服务框架的服务地址列表等就非常适合使用。</p><h4 id="负载均衡"><a href="#负载均衡" class="headerlink" title="负载均衡"></a>负载均衡</h4><h4 id="命名服务"><a href="#命名服务" class="headerlink" title="命名服务"></a>命名服务</h4><h4 id="分布式通知-协调"><a href="#分布式通知-协调" class="headerlink" title="分布式通知/协调"></a>分布式通知/协调</h4><h4 id="集群管理与Master选举"><a href="#集群管理与Master选举" class="headerlink" title="集群管理与Master选举"></a>集群管理与Master选举</h4><h4 id="分布式锁"><a href="#分布式锁" class="headerlink" title="分布式锁"></a>分布式锁</h4><h4 id="分布式队列"><a href="#分布式队列" class="headerlink" title="分布式队列"></a>分布式队列</h4>]]></content>
+      
+      
+      <categories>
+          
+          <category> Big Data </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> ZooKeeper </tag>
+            
+            <tag> 分布式 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>深入JVM内核</title>
+      <link href="/2019/11/10/%E6%B7%B1%E5%85%A5JVM%E5%86%85%E6%A0%B8/"/>
+      <url>/2019/11/10/%E6%B7%B1%E5%85%A5JVM%E5%86%85%E6%A0%B8/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>CSharp-script-for-Unity-first-part</title>
+      <link href="/2019/11/06/CSharp-script-for-Unity-first-part/"/>
+      <url>/2019/11/06/CSharp-script-for-Unity-first-part/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>UML面向对象建模</title>
+      <link href="/2019/11/01/UML%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%BB%BA%E6%A8%A1/"/>
+      <url>/2019/11/01/UML%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E5%BB%BA%E6%A8%A1/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h3 id="UML类图"><a href="#UML类图" class="headerlink" title="UML类图"></a>UML类图</h3>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> uml </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>设计模式之工厂模式</title>
+      <link href="/2019/11/01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/"/>
+      <url>/2019/11/01/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E5%B7%A5%E5%8E%82%E6%A8%A1%E5%BC%8F/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><p>程序设计的设计模式总共分为三大类：创建型设计模式、结构型设计模式、行为型设计模式</p><p><strong>创建型设计模式</strong>包括：<strong>工厂模式</strong>、<strong>单例模式</strong>、<strong>原型模式</strong>、</p><p><strong>结构型设计模式</strong>包括：<strong>桥接模式</strong>、<strong>外观模式</strong>、<strong>设配器模式</strong>、</p><p><strong>行为型设计模式</strong>包括：</p><h3 id="普通工厂模式"><a href="#普通工厂模式" class="headerlink" title="普通工厂模式"></a>普通工厂模式</h3><p>类图</p><p>案例</p><h3 id="抽象工厂模式"><a href="#抽象工厂模式" class="headerlink" title="抽象工厂模式"></a>抽象工厂模式</h3><h3 id="工厂方法模式"><a href="#工厂方法模式" class="headerlink" title="工厂方法模式"></a>工厂方法模式</h3>]]></content>
+      
+      
+      <categories>
+          
+          <category> 程序设计 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 设计模式 </tag>
+            
+            <tag> 工厂模式 </tag>
+            
+            <tag> 创建型设计模式 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>数据密集型应用设计学习笔记</title>
+      <link href="/2019/10/24/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/"/>
+      <url>/2019/10/24/%E6%95%B0%E6%8D%AE%E5%AF%86%E9%9B%86%E5%9E%8B%E5%BA%94%E7%94%A8%E8%AE%BE%E8%AE%A1%E2%80%94%E2%80%94%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h3 id="1、可靠性、可扩展性、可维护性"><a href="#1、可靠性、可扩展性、可维护性" class="headerlink" title="1、可靠性、可扩展性、可维护性"></a>1、可靠性、可扩展性、可维护性</h3><ul><li>可靠性（Reliability）：系统在困境（adversity）（硬件故障、软件故障、人为错误）中人可以正常工作（正确完成功能，并能达到期望的性能水准）</li><li>可扩展性（Scalability）：有合理办法应对系统的增长（数据量、流量、复杂性）</li><li>可维护性（Maintainability）：许多不同的人（工程师、运维）在不同的生命周期，都能高效地在系统上工作（使系统保持现有行为，并适应新的应用场景）</li></ul><h3 id="2、数据模型与查询语言"><a href="#2、数据模型与查询语言" class="headerlink" title="2、数据模型与查询语言"></a>2、数据模型与查询语言</h3><h4 id="关系模型与文档模型"><a href="#关系模型与文档模型" class="headerlink" title="关系模型与文档模型"></a>关系模型与文档模型</h4><h4 id="NoSql"><a href="#NoSql" class="headerlink" title="NoSql"></a>NoSql</h4><p>非关系型、分布式、不提供ACID的数据库设计模式</p><p>Nosql优势：</p><ul><li>易扩展，NoSQL数据库种类繁多，但是一个共同的特点都是去掉关系数据库的关系型特性。</li><li>非常高的读写性能，尤其在大数据量下，同样表现优秀。这得益于它的无关系性，数据库的结构简单。</li></ul><p>NoSql数据库分类：</p><ul><li>键值(Key-Value)存储数据库</li><li>列存储数据库</li><li>文档型数据库</li><li>图形数据库</li></ul><h4 id="采用NoSql数据库的背后几个驱动因素："><a href="#采用NoSql数据库的背后几个驱动因素：" class="headerlink" title="采用NoSql数据库的背后几个驱动因素："></a>采用NoSql数据库的背后几个驱动因素：</h4><ul><li>需要比关系型数据库更好的扩展性，包括非常大的数据集或非常高的写入吞吐量</li><li>相比商业数据库产品，免费和开源软件更受偏爱</li><li>关系模型不能很好的支持一些特殊的查询操作</li><li>受挫于关系模型的限制性，渴望一种更具多动态性与表现力的数据模型</li></ul><h4 id="对象关系不匹配"><a href="#对象关系不匹配" class="headerlink" title="对象关系不匹配"></a>对象关系不匹配</h4><p>如果数据存储在关系表中，那么需要一个笨拙的转换层，处于应用程序代码中的对象和表，行，列的数据库模型之间。模型之间的不连贯有时被称为阻抗不匹配。</p><h4 id="网络模型（CODASYL模型）"><a href="#网络模型（CODASYL模型）" class="headerlink" title="网络模型（CODASYL模型）"></a>网络模型（CODASYL模型）</h4><p>CODASYL模型是层次模型的推广。在层次模型的树结构中，每条记录只有一个父节点；在网络模式中，每条记录可能有多个父节点。</p><p>网络模型中记录之间的链接不是外键，而更像编程语言中的指针（同时仍然存储在磁盘上）。</p><h4 id="文档模型与关系模型对比"><a href="#文档模型与关系模型对比" class="headerlink" title="文档模型与关系模型对比"></a>文档模型与关系模型对比</h4><p>文档数据模型的主要优势是架构灵活性，因局部性而拥有更好的性能，以及对于某些应用程序而言更接近于应用程序使用的数据结构。关系模型的优势使为连接提供更好的支持以及支持多对一和多对多的关系。</p><h4 id="文档中的架构灵活性"><a href="#文档中的架构灵活性" class="headerlink" title="文档中的架构灵活性"></a>文档中的架构灵活性</h4><p>没有模式意味着可以将任意的键和值添加到文档中，并且当读取时，客户端无法保证文档可能包含的字段。</p><p>文档数据库有时称为无模式（schemaless），但这具有误导性，因为读取数据的代码通常假定某种结构——即存在隐式模式，但不由数据库强制执行。一个更精确的术语是读时模式（schema-on-read）（数据的结构是隐含的，只有在数据被读取时才被解释），相应的是写时模式（schema-on-write）（传统的关系数据库方法中，模式明确，且数据库确保所有的数据都符合其模式）</p><p>当由于某种原因（例如，数据是<strong>异构</strong>的）集合中的项目并不都具有相同的结构时,读时模式更具优势。例如，如果：</p><ul><li>存在许多不同类型的对象，将每种类型的对象放在自己的表中是不现实的。</li><li>数据的结构由外部系统决定。你无法控制外部系统且它随时可能变化。</li></ul><h4 id="查询数据的局部性"><a href="#查询数据的局部性" class="headerlink" title="查询数据的局部性"></a>查询数据的局部性</h4><p>文档通常以单个连续字符串形式进行存储，编码为JSON，XML或其二进制变体（如MongoDB的BSON）。如果应用程序经常需要访问整个文档（例如，将其渲染至网页），那么存储局部性会带来性能优势。如果将数据分割到多个表中，则需要进行多次索引查找才能将其全部检索出来，这可能需要更多的磁盘查找并花费更多的时间。</p><h4 id="文档和关系数据库的融合"><a href="#文档和关系数据库的融合" class="headerlink" title="文档和关系数据库的融合"></a>文档和关系数据库的融合</h4><p>自2000年代中期以来，大多数关系数据库系统（MySQL除外）都已支持XML。这包括对XML文档进行本地修改的功能，以及在XML文档中进行索引和查询的功能。这允许应用程序使用那种与文档数据库应当使用的非常类似的数据模型。</p><p>在文档数据库中，RethinkDB在其查询语言中支持类似关系的连接，一些MongoDB驱动程序可以自动解析数据库引用（有效地执行客户端连接，尽管这可能比在数据库中执行的连接慢，需要额外的网络往返，并且优化更少）。</p><h4 id="数据查询语句"><a href="#数据查询语句" class="headerlink" title="数据查询语句"></a>数据查询语句</h4><p><strong>声明式查询语句</strong>：在声明式查询语言（如SQL或关系代数）中，你只需指定所需数据的模式 - 结果必须符合哪些条件，以及如何将数据转换（例如，排序，分组和集合）， 但不需指定如何实现这一目标。数据库系统的查询优化器决定使用哪些索引和哪些连接方法，以及以何种顺序执行查询的各个部分。</p><p><strong>命令式查询语句</strong>：许多常用的编程语言是命令式的，命令式语言告诉计算机以特定顺序执行某些操作。</p><p><strong>声明式语言</strong>往往适合<strong>并行执行</strong>。现在，CPU的速度通过内核的增加变得更快，而不是以比以前更高的时钟速度运行。命令代码很难在多个内核和多个机器之间并行化，因为它指定了指令必须以特定顺序执行。声明式语言更具有并行执行的潜力，因为它们仅指定结果的模式，而不指定用于确定结果的算法。在适当情况下，数据库可以自由使用查询语言的并行实现。</p><p><strong>MapReduce查询</strong></p><p><strong>图数据模型</strong></p><p>cypher查询语句</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 数据库 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 关系模型 </tag>
+            
+            <tag> NoSql </tag>
+            
+            <tag> MapReduce </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>hexo+github搭建个人博客</title>
+      <link href="/2019/10/24/hexo-github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/"/>
+      <url>/2019/10/24/hexo-github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h3 id="一、环境搭建"><a href="#一、环境搭建" class="headerlink" title="一、环境搭建"></a>一、环境搭建</h3><ul><li><h5 id="Node-js"><a href="#Node-js" class="headerlink" title="Node.js"></a>Node.js</h5></li><li><h5 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h5></li></ul><h3 id="二、连接GitHub"><a href="#二、连接GitHub" class="headerlink" title="二、连接GitHub"></a>二、连接GitHub</h3><h5 id="1、设置用户名和邮箱"><a href="#1、设置用户名和邮箱" class="headerlink" title="1、设置用户名和邮箱"></a>1、设置用户名和邮箱</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git config --global user.name "GitHub用户名"</span><br><span class="line">git config --global user.email "GitHub邮箱"</span><br></pre></td></tr></table></figure><h5 id="2、创建SSH密钥"><a href="#2、创建SSH密钥" class="headerlink" title="2、创建SSH密钥"></a>2、创建SSH密钥</h5><p>在Git Bash中输入以下命令</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa -C "GitHub 邮箱"</span><br></pre></td></tr></table></figure><p>一路回车即可</p><h5 id="3、添加密钥"><a href="#3、添加密钥" class="headerlink" title="3、添加密钥"></a>3、添加密钥</h5><p>进入 [C:\Users\用户名.ssh] 目录（要勾选显示“隐藏的项目”），用记事本打开公钥 id_rsa.pub 文件并复制里面的内容。</p><p>登陆 GitHub ，进入 Settings 页面，选择左边栏的 SSH and GPG keys，点击 New SSH key。</p><p>Title 自定义，粘贴复制的 id_rsa.pub 内容到 Key 中，点击 Add SSH key 完成添加。</p><h5 id="4、验证连接"><a href="#4、验证连接" class="headerlink" title="4、验证连接"></a>4、验证连接</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -T git@github.com</span><br></pre></td></tr></table></figure><h5 id="5、创建Github-Page仓库"><a href="#5、创建Github-Page仓库" class="headerlink" title="5、创建Github Page仓库"></a>5、创建Github Page仓库</h5><p>GitHub 主页右上角加号 -&gt; New repository：</p><ul><li>Repository name 中输入 用户名.github.io</li><li>勾选 “Initialize this repository with a README”</li><li>Description 选填</li><li>填好后点击 Create repository 创建。</li></ul><h3 id="三、安装Hexo"><a href="#三、安装Hexo" class="headerlink" title="三、安装Hexo"></a>三、安装Hexo</h3><p>npm 命令安装 Hexo</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure><p>初始化并安装组件</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hexo init</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure><p>启动本地服务预览</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hexo g #生产页面</span><br><span class="line">hexo s #启动预览</span><br></pre></td></tr></table></figure><h3 id="四、部署Hexo到Github-Pages"><a href="#四、部署Hexo到Github-Pages" class="headerlink" title="四、部署Hexo到Github Pages"></a>四、部署Hexo到Github Pages</h3><p>首先安装 hexo-deployer-git</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure><p>然后修改 _config.yml 文件末尾的 Deployment 部分</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repository: git@github.com:用户名/用户名.github.io.git</span><br><span class="line">  branch: master</span><br></pre></td></tr></table></figure><p>最后，运行如下指令</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo d</span><br></pre></td></tr></table></figure><p>然后在浏览器输入<code>https://leer0.github.io</code></p><p><img src="/2019/10/24/hexo-github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/hexo-success.PNG" alt></p><p>大功告成</p><h3 id="五、相关问题"><a href="#五、相关问题" class="headerlink" title="五、相关问题"></a>五、相关问题</h3><h4 id="1、解决markdown文章图片无法显示问题"><a href="#1、解决markdown文章图片无法显示问题" class="headerlink" title="1、解决markdown文章图片无法显示问题"></a>1、解决markdown文章图片无法显示问题</h4><p>(1) 首先修改_config.yml的如下字段</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">post_asset_folder:true</span><br></pre></td></tr></table></figure><p>当您设置 post_asset_folder 参数后，在建立文件时，Hexo 会自动建立一个与文章同名的文件夹，您可以把与该文章相关的所有资源都放到此文件夹内，这样就可以更方便的使用资源。</p><p>(2) 然后到博客根目录下执行如下语句来安装hexo-assert-image插件</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install https://github.com/CodeFalling/hexo-asset-image --save</span><br></pre></td></tr></table></figure><p>(3) 安装完成之后，来测试一下</p><p>首先新建一个test文件</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new test</span><br></pre></td></tr></table></figure><p>此时在source/_post路径下会生成下两个文件</p><ul><li>test.md</li><li>test文件夹</li></ul><p>将图片放入test文件夹，在test.md使用相对路径访问图片即可</p><h3 id="2、hexo添加看板娘"><a href="#2、hexo添加看板娘" class="headerlink" title="2、hexo添加看板娘"></a>2、hexo添加看板娘</h3><p>在博客根目录输入如下指令，安装live2d插件</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install --save hexo-helper-live2d</span><br></pre></td></tr></table></figure><p>输入以下命令下载相应模型，更多模型选择<a href="https://github.com/xiazeyu/live2d-widget-models" target="_blank" rel="noopener">点击此处</a>，模型预览<a href="https://huaji8.top/post/live2d-plugin-2.0/" target="_blank" rel="noopener">点击此处</a></p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install live2d-widget-model-hijiki</span><br></pre></td></tr></table></figure><p>打开_config.yml文件，添加如下配置</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">live2d:</span></span><br><span class="line"><span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">scriptFrom:</span> <span class="string">local</span></span><br><span class="line"><span class="attr">model:</span> </span><br><span class="line"><span class="attr">use:</span> <span class="string">live2d-widget-model-hijiki</span> <span class="comment">#模型选择</span></span><br><span class="line"><span class="attr">display:</span> </span><br><span class="line"><span class="attr">position:</span> <span class="string">left</span>  <span class="comment">#模型位置</span></span><br><span class="line"><span class="attr">width:</span> <span class="number">150</span>       <span class="comment">#模型宽度</span></span><br><span class="line"><span class="attr">height:</span> <span class="number">300</span>      <span class="comment">#模型高度</span></span><br><span class="line"><span class="attr">mobile:</span> </span><br><span class="line"><span class="attr">show:</span> <span class="literal">false</span>      <span class="comment">#是否在手机端显示</span></span><br></pre></td></tr></table></figure><p>设置好之后就大功告成了，效果如下图：</p><p><img src="/2019/10/24/hexo-github%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2/live2d.PNG" alt></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 应用 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> hexo </tag>
+            
+            <tag> 博客 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>java集合类</title>
+      <link href="/2019/10/24/java%E9%9B%86%E5%90%88%E7%B1%BB/"/>
+      <url>/2019/10/24/java%E9%9B%86%E5%90%88%E7%B1%BB/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><h4 id="一、Collection接口和它的Set、List子接口"><a href="#一、Collection接口和它的Set、List子接口" class="headerlink" title="一、Collection接口和它的Set、List子接口"></a>一、Collection接口和它的Set、List子接口</h4><p>Collection接口和它的子接口以及实现类的结构如下图所示</p><p><img src="/2019/10/24/java%E9%9B%86%E5%90%88%E7%B1%BB/Collection%E9%9B%86%E5%90%88%E4%BD%93%E7%B3%BB%E7%BB%A7%E6%89%BF%E6%A0%91.png" alt></p><p><strong>List</strong>表示的是<strong>有序</strong>且元素<strong>可重复</strong>的容器。</p><p><strong>Set</strong>表示的是<strong>无序</strong>且元素<strong>不可重复</strong>的容器，容器内没有索引。</p><h5 id="1、List接口的实现类"><a href="#1、List接口的实现类" class="headerlink" title="1、List接口的实现类"></a>1、List接口的实现类</h5><p>1.1、ArrayList类</p><p><strong>实现原理：</strong></p><p>ArrayList底层是由<strong>数组</strong>实现的存储。实现动态数组存储的方式是每新添加一个元素，首先检测数组是否已经满了。jdk1.8中，当数组的大小不够用时，newCapacity = oldCapacity + (oldCapacity &gt;&gt; 1)</p><p><strong>特点：</strong></p><p>1、查询效率高</p><p>2、增删效率低（每当删除或增加元素时，都要拷贝多个元素来实现元素位置移动）</p><p>3、线程不安全</p><p><strong>方法：</strong></p><p>size():返回元素的个数</p><p>indexOf(“a”):返回指定元素a第一次出现时的索引</p><p>lastIndexOf(“A”):返回指定元素a最后一次出现时的索引</p><p>remove(o):删除第一个与匹配的元素</p><p>1.2、LinkedList类</p><p><strong>实现原理：</strong></p><p>LinkedList底层使用<strong>双向链表</strong>实现存储。</p><p><strong>特点：</strong></p><p>1、查询效率低</p><p>2、增删效率高</p><p>3、线程不安全</p><p><strong>方法：</strong></p><p>add(E):boolean ——在链表末尾添加新元素</p><p>1.3、Vector类</p><p>Vector底层使用数组实现存储，相关的方法增加了同步检查，如indexOf方法增加了synchronized同步标记。因此具有<strong>线程安全</strong>但<strong>效率低</strong>的特点，实际使用的情况不多。</p><p><strong>建议：</strong></p><p>1、需要线程安全时使用Vector</p><p>2、不存在线程安全问题，并且查找较多时使用ArrayList</p><p>3、不存在线程安全问题，并且增删较多时使用LinkedList</p><h5 id="2、Set接口的实现类"><a href="#2、Set接口的实现类" class="headerlink" title="2、Set接口的实现类"></a>2、Set接口的实现类</h5><p>1、HashSet</p><p>HashSet底层使用Map实现。</p><p>2、TreeSet</p><p>TreeSet底层实际是用TreeMap实现，内部维持了一个简化的TreeMap，通过key来实现存储Set的元素。TreeSet需要对存储的元素进行排序，因此需要多元素对应的类<strong>实现Compareable接口</strong>，然后根据compareTo()方法比较元素之间的大小。</p><h5 id="3、Collections类"><a href="#3、Collections类" class="headerlink" title="3、Collections类"></a>3、Collections类</h5><p>Collections是针对集合类的一个帮助类，他提供一系列静态方法实现对各种集合的搜索、排序、线程安全等操作</p><p>collections的sort方法：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T extends Comparable&lt;? <span class="keyword">super</span> T&gt;&gt; <span class="function"><span class="keyword">void</span> <span class="title">sort</span><span class="params">(List&lt;T&gt; list)</span> </span>&#123;</span><br><span class="line">    Object[] a = list.toArray();</span><br><span class="line">    Arrays.sort(a);</span><br><span class="line">    ListIterator&lt;T&gt; i = list.listIterator();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> j=<span class="number">0</span>; j&lt;a.length; j++) &#123;</span><br><span class="line">        i.next();</span><br><span class="line">        i.set((T)a[j]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>通过sort方法的源码可以看出，该方法将list转成了数组对象后，调用了Array的sort方法，将数组排序，再用list的迭代器（注意不是collection迭代器）一个个得赋值回去，就使得传入的list变成了一个有序的list。</p><p><strong>注</strong>：若相对一个自定义的对象的list排序，必须在该对象所属的类中实现Comparable接口，或者也可以使用以下的sort方法使用自定义的比较逻辑：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T extends Comparable&lt;? <span class="keyword">super</span> T&gt;&gt; <span class="function"><span class="keyword">void</span> <span class="title">sort</span><span class="params">(List&lt;T&gt; list)</span> </span>&#123;</span><br><span class="line">    Object[] a = list.toArray();</span><br><span class="line">    Arrays.sort(a);</span><br><span class="line">    ListIterator&lt;T&gt; i = list.listIterator();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> j=<span class="number">0</span>; j&lt;a.length; j++) &#123;</span><br><span class="line">        i.next();</span><br><span class="line">        i.set((T)a[j]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p><strong>java8中的Collections.sort使用方法</strong></p><h4 id="二、Map接口"><a href="#二、Map接口" class="headerlink" title="二、Map接口"></a>二、Map接口</h4><h5 id="1、Map接口的实现类"><a href="#1、Map接口的实现类" class="headerlink" title="1、Map接口的实现类"></a>1、Map接口的实现类</h5><h6 id="1-1、HashMap类"><a href="#1-1、HashMap类" class="headerlink" title="1.1、HashMap类"></a>1.1、HashMap类</h6><p>HashMap底层实现使用了哈希表，<strong>哈希表的基本结构是数组+链表，当链表长度大于8时，链表就转换为红黑树，</strong>这样就又大大提高了链表的查询效率。</p><p><strong>JDK 1.8 HashMap 采用位桶 + 链表 + 红黑树（自平衡的二叉查找树）实现。（当链表长度超过阈值 “8” 时，将链表转换为红黑树）</strong></p><p><strong>java中规定：两个内容相同(equals()返回值为true)的对象必须具有相等的hashcode。</strong></p><p><img src="/2019/10/24/java%E9%9B%86%E5%90%88%E7%B1%BB/Hash%E5%AD%98%E5%82%A8%E9%94%AE%E5%80%BC%E5%AF%B9%E7%9A%84%E8%BF%87%E7%A8%8B.PNG" alt></p><p>位桶数组扩容：capacity 是数组（bucket）的大小，loadFactor 是数组的最大填满比例。当数组中的节点（entry）数目 &gt;capacity∗loadFactor 时，就需要扩容，调整数组的大小为当前的 2 倍，以提高 HashMap 的 hash 效率。</p><h6 id="1-2、ConcurrentHashMap"><a href="#1-2、ConcurrentHashMap" class="headerlink" title="1.2、ConcurrentHashMap"></a>1.2、ConcurrentHashMap</h6><h6 id="1-3、TreeMap类"><a href="#1-3、TreeMap类" class="headerlink" title="1.3、TreeMap类"></a>1.3、TreeMap类</h6><p>TreeMap是典型的红黑树(<strong>一种自平衡二叉查找树\排序树</strong>)的实现，存储的元素按照key递增的方式排序。</p><h6 id="1-4、HashMap和HashTable的区别"><a href="#1-4、HashMap和HashTable的区别" class="headerlink" title="1.4、HashMap和HashTable的区别"></a>1.4、HashMap和HashTable的区别</h6><p>1、HashMap：线程不安全，效率高。允许key或value为null</p><p>2、HashTable：线程安全，效率低。不允许key或value为null</p><h6 id="1-5、补充：HsahTable"><a href="#1-5、补充：HsahTable" class="headerlink" title="1.5、补充：HsahTable"></a>1.5、补充：HsahTable</h6><p>（1）Hashtable 是一个散列表，它存储的内容是键值对(key-value)映射。</p><p>（2）Hashtable 继承于Dictionary，实现了Map、Cloneable、java.io.Serializable接口。</p><p>（3）Hashtable 的函数都是同步的，这意味着它是线程安全的。它的key、value都不可以为null。</p><h4 id="三、遍历各个容器的方法："><a href="#三、遍历各个容器的方法：" class="headerlink" title="三、遍历各个容器的方法："></a>三、遍历各个容器的方法：</h4><h5 id="1、使用迭代器"><a href="#1、使用迭代器" class="headerlink" title="1、使用迭代器"></a>1、使用迭代器</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//List和Map的便利步骤相同</span></span><br><span class="line">List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">list.add(<span class="string">"aa"</span>);</span><br><span class="line">list.add(<span class="string">"ab"</span>);</span><br><span class="line">list.add(<span class="string">"ac"</span>);</span><br><span class="line"><span class="keyword">for</span>(Iterate&lt;String&gt; iter = list.iterator();iter.hasNext();)&#123;</span><br><span class="line">    String temp = iter.next();</span><br><span class="line">    iter.remove();<span class="comment">//如果遍历时要删除集合中的元素，建议使用这种方式</span></span><br><span class="line">    System.out.println(temp);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//第一种Map的遍历方式</span></span><br><span class="line">Map&lt;String,Object&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">map.put(<span class="string">"01"</span>,<span class="string">"aa"</span>);</span><br><span class="line">map.put(<span class="string">"02"</span>,<span class="string">"ab"</span>);</span><br><span class="line">map.put(<span class="string">"03"</span>,<span class="string">"ac"</span>);</span><br><span class="line">Set&lt;Entry&lt;String,Object&gt;&gt; ss = map.entrySet();</span><br><span class="line"><span class="keyword">for</span>(Iterator&lt;Entry&lt;String,Object&gt;&gt; iter = ss.iterator();iter.hasNext();)&#123;</span><br><span class="line">    Entry&lt;String,Object&gt; temp = iter.Next();</span><br><span class="line">    System.out.println(temp.getKey()+<span class="string">"---"</span>+temp.getValue());</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//第二种Map的遍历方式</span></span><br><span class="line">Set&lt;String&gt; keySet = map.keySet();</span><br><span class="line"><span class="keyword">for</span>(Iterator iter = keySet.Iterator();iter.hasNext();)&#123;</span><br><span class="line">    String key = iter.next();</span><br><span class="line">    System.out.println(key+<span class="string">"---"</span>+map.get(key));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h5 id="2、其他类型的遍历方式"><a href="#2、其他类型的遍历方式" class="headerlink" title="2、其他类型的遍历方式"></a>2、其他类型的遍历方式</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//增强for循环，Set同理</span></span><br><span class="line"><span class="keyword">for</span>(String temp:list)&#123;</span><br><span class="line">    System.out.println(temp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> 编程语言 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 容器类 </tag>
+            
+            <tag> java </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+  
+  
+</search>
